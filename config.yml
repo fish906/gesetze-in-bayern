@@ -1,5 +1,0 @@
-database:
-  host: 172.16.1.11
-  user: gesetze_user
-  password: elektro1
-  db: gesetze_bayern
