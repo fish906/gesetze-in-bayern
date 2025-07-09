@@ -1,0 +1,22 @@
+base_url: "https://www.gesetze-bayern.de/Content/Document"
+
+global:
+  retries: 3
+  delay_between_requests: 1  # in Sekunden
+
+laws:
+#  - id: "BayVwVfG"
+#    name: "Bayerisches Verwaltungsverfahrensgesetz"
+#    numbering:
+#      type: "article"
+#      prefix: "BayVwVfG-"
+#      start: 1
+#      end: 100
+
+  - id: "BayGO"
+    name: "Gemeindeordnung für den Freistaat Bayern"
+    numbering:
+        type: "article"
+        prefix: "BayBO-"
+        start: 1
+        end: 125
