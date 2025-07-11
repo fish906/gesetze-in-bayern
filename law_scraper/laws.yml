@@ -5,18 +5,66 @@ global:
   delay_between_requests: 1  # in Sekunden
 
 laws:
-#  - id: "BayVwVfG"
-#    name: "Bayerisches Verwaltungsverfahrensgesetz"
-#    numbering:
-#      type: "article"
-#      prefix: "BayVwVfG-"
-#      start: 1
-#      end: 100
+  - id: "BayVwVfG"
+    name: "Bayerisches Verwaltungsverfahrensgesetz"
+    numbering:
+      type: "article"
+      prefix: "BayVwVfG-"
+      start: 1
+      end: 100
 
-  - id: "BayGO"
+  - id: "BayBO"
     name: "Gemeindeordnung für den Freistaat Bayern"
     numbering:
         type: "article"
         prefix: "BayBO-"
         start: 1
-        end: 125
+        end: 81 
+
+  - id: "BayGO"
+    name: "Gemeindeordnung für den Freistaat Bayern"
+    numbering:
+      type: "article"
+      prefix: "BayGO-"
+      start: 1
+      end: 122
+
+  - id: "BayVwZVG"
+    name: "Bayerisches Verwaltungszustellungs- und Vollstreckungsgesetz"
+    numbering:
+      type: "article"
+      prefix: "BayVwZVG-"
+      start: 1
+      end: 45
+
+  - id: "JAPO"
+    name: "Ausbildungs- und Prüfungsordnung für Juristen"
+    numbering:
+      type: "article"
+      prefix: "BayJAPO-"
+      start: 1
+      end: 73
+      
+  - id: "LKrO"
+    name: "Landkreisordnung für den Freistaat Bayern"
+    numbering:
+      type: "article"
+      prefix: "BayLKrO-"
+      start: 1
+      end: 108
+
+  - id: "GLKrWG"
+    name: "Gesetz über die Wahl der Gemeinderäte, der Bürgermeister, der Kreistage und der Landräte"
+    numbering:
+      type: "article"
+      prefix: "BayGLKrWG-"
+      start: 1
+      end: 61
+
+  - id: "GLKrWO"
+    name: "Wahlordnung für die Gemeinde- und die Landkreiswahlen"
+    numbering:
+      type: "article"
+      prefix: "BayGLKrWO-"
+      start: 1
+      end: 103

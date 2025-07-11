@@ -1,0 +1,66 @@
+/* Grundlayout */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background-color: #f5f7fa;
+  color: #1c1e21;
+}
+
+/* App-Container */
+.app {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Norm-Container */
+.norm-container {
+  max-width: 800px;
+  width: 100%;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Überschrift */
+.norm-heading {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #003366;
+}
+
+/* Inhalt */
+.norm-content p {
+  margin: 1rem 0;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  text-align: justify;
+}
+
+.norm-content ol {
+  margin: 1rem 0 1rem 1.5rem;
+  padding-left: 1rem;
+}
+
+.norm-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.norm-content sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  color: #555;
+}
+
+/* Ladeanzeige */
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 3rem;
+  color: #666;
+}

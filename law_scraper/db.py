@@ -1,8 +1,26 @@
 import pymysql
 import yaml
 import os
+import hashlib
+import logging
+
+logger = logging.getLogger("law_scraper.db")
+logger.setLevel(logging.DEBUG)
+
+# Konsole
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # Du kannst INFO oder DEBUG setzen
+
+# Format
+formatter = logging.Formatter("[%(levelname)s] %(asctime)s | %(name)s | %(message)s")
+console_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
 
 def load_db_config(path="config.yml"):
+    base_dir = os.path.dirname(os.path.dirname(__file__))  # geht von law_scraper auf law_app
+    path = os.path.join(base_dir, 'config.yml')
+    
     if not os.path.exists(path):
         raise FileNotFoundError(f"Config-Datei nicht gefunden: {path}")
 
@@ -13,7 +31,6 @@ def load_db_config(path="config.yml"):
         raise KeyError("In der config.yaml fehlt der Abschnitt 'database'")
 
     return config['database']
-
 
 def init_db():
     db_conf = load_db_config()
@@ -26,42 +43,34 @@ def init_db():
         charset='utf8mb4',
         autocommit=False
     )
+    logger.info("Datenbankverbindung hergestellt.")
     return conn
 
 def get_or_create_law(conn, law_identifier, law_description):
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM laws WHERE name = %s", (law_identifier,))
-    result = cursor.fetchone()
-    if result:
-        return result[0]
-    else:
-        cursor.execute(
-            "INSERT INTO laws (name, description) VALUES (%s, %s)",
-            (law_identifier, law_description)
-        )
-        conn.commit()
-        return cursor.lastrowid
-
-
-def save_law(conn, name, description=None):
     with conn.cursor() as cursor:
-        # Prüfen, ob es schon existiert
-        sql = "SELECT id FROM laws WHERE name = %s"
-        cursor.execute(sql, (name,))
+        cursor.execute("SELECT id FROM laws WHERE name = %s", (law_identifier,))
         result = cursor.fetchone()
-
         if result:
-            law_id = result[0]
+            logger.debug(f"Gesetz gefunden: {law_identifier} (ID: {result[0]})")
+            return result[0]
         else:
-            sql = "INSERT INTO laws (name, description) VALUES (%s, %s)"
-            cursor.execute(sql, (name, description))
+            cursor.execute(
+                "INSERT INTO laws (name, description) VALUES (%s, %s)",
+                (law_identifier, law_description)
+            )
+            conn.commit()
             law_id = cursor.lastrowid
+            logger.info(f"Neues Gesetz eingefügt: {law_identifier} (ID: {law_id})")
+            return law_id
 
-        conn.commit()
-        return law_id
+def hash_content(content):
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 def save_norm(conn, data):
     cursor = conn.cursor()
+
+    if 'content_hash' not in data or not data['content_hash']:
+        data['content_hash'] = hash_content(data['content'])
 
     sql_select = """
     SELECT content_hash FROM norms WHERE law_id = %s AND number = %s
@@ -72,14 +81,15 @@ def save_norm(conn, data):
     if result:
         existing_hash = result[0]
         if existing_hash == data['content_hash']:
-            print(f"No changes for law_id={data['law_id']}, number={data['number']}")
-            return  # Keine Änderung, nichts tun
+            logger.debug(f"Unverändert: law_id={data['law_id']}, number={data['number']}")
+            return 
 
         sql_update = """
-        UPDATE norms
-        SET number_raw = %s, title = %s, content = %s, url = %s, content_hash = %s
-        WHERE law_id = %s AND number = %s
+            UUPDATE norms
+            SET number_raw = %s, title = %s, content = %s, url = %s, content_hash = %s, last_seen = %s
+            WHERE law_id = %s AND number = %s
         """
+
         cursor.execute(sql_update, (
             data['number_raw'],
             data['title'],
@@ -87,16 +97,17 @@ def save_norm(conn, data):
             data['url'],
             data['content_hash'],
             data['law_id'],
-            data['number']
+            data['number'],
+            data['last_seen']
         ))
-        print(f"Updated law_id={data['law_id']}, number={data['number']}")
+        logger.info(f"Aktualisiert: law_id={data['law_id']}, number={data['number']}")
 
     else:
-        # Norm existiert nicht → Insert
         sql_insert = """
-        INSERT INTO norms (law_id, number, number_raw, title, content, url, content_hash)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO norms (law_id, number, number_raw, title, content, url, content_hash, last_seen)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
+
         cursor.execute(sql_insert, (
             data['law_id'],
             data['number'],
@@ -104,9 +115,10 @@ def save_norm(conn, data):
             data['title'],
             data['content'],
             data['url'],
-            data['content_hash']
+            data['content_hash'],
+            data['last_seen']
         ))
-        print(f"Inserted law_id={data['law_id']}, number={data['number']}")
+        logger.info(f"Eingefügt: law_id={data['law_id']}, number={data['number']}")
 
     conn.commit()
 
@@ -114,6 +126,6 @@ def close_db(conn):
     try:
         if conn:
             conn.close()
-            print("DB-Verbindung geschlossen.")
+            logger.info("Datenbankverbindung geschlossen.")
     except Exception as e:
-        print(f"Fehler beim Schließen der DB-Verbindung: {e}")
+        logger.error(f"Fehler beim Schließen der Verbindung: {e}")

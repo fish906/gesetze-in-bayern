@@ -5,20 +5,18 @@ from parser import parse_norm
 from db import save_norm, init_db, get_or_create_law  
 import hashlib
 
-# YAML laden
 with open('laws.yml', 'r') as f:
     config = yaml.safe_load(f)
 
 BASE_URL = config['base_url']
 GLOBAL_RETRIES = config.get('global', {}).get('retries', 3)
-DELAY = config.get('global', {}).get('delay_between_requests', 1)
+DELAY = config.get('global', {}).get('delay_between_requests', 0.3)
 
-# DB-Verbindung einmal initialisieren
 conn = init_db()
 
 for law in config['laws']:
-    law_identifier = law['id']  # z. B. "BayVwVfG"
-    law_name = law['name']      # z. B. "Bayerisches Verwaltungsverfahrensgesetz"
+    law_identifier = law['id']
+    law_name = law['name']
     db_law_id = get_or_create_law(conn, law_identifier, law_name)
 
 
