@@ -2,22 +2,22 @@ base_url: "https://www.gesetze-bayern.de/Content/Document"
 
 global:
   retries: 3
-  delay_between_requests: 1  # in Sekunden
+  delay_between_requests: 1
 
 laws:
   - id: "BayVwVfG"
     name: "Bayerisches Verwaltungsverfahrensgesetz"
     numbering:
       type: "article"
-      prefix: "BayVwVfG-"
+      prefix: "BayVwVfG"
       start: 1
       end: 100
 
   - id: "BayBO"
-    name: "Gemeindeordnung für den Freistaat Bayern"
+    name: "Bayerische Bauordnung"
     numbering:
         type: "article"
-        prefix: "BayBO-"
+        prefix: "BayBO"
         start: 1
         end: 81 
 
@@ -25,7 +25,7 @@ laws:
     name: "Gemeindeordnung für den Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayGO-"
+      prefix: "BayGO"
       start: 1
       end: 122
 
@@ -33,7 +33,7 @@ laws:
     name: "Bayerisches Verwaltungszustellungs- und Vollstreckungsgesetz"
     numbering:
       type: "article"
-      prefix: "BayVwZVG-"
+      prefix: "BayVwZVG"
       start: 1
       end: 45
 
@@ -41,7 +41,7 @@ laws:
     name: "Ausbildungs- und Prüfungsordnung für Juristen"
     numbering:
       type: "article"
-      prefix: "BayJAPO-"
+      prefix: "BayJAPO"
       start: 1
       end: 73
       
@@ -49,7 +49,7 @@ laws:
     name: "Landkreisordnung für den Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayLKrO-"
+      prefix: "BayLKrO"
       start: 1
       end: 108
 
@@ -57,7 +57,7 @@ laws:
     name: "Gesetz über die Wahl der Gemeinderäte, der Bürgermeister, der Kreistage und der Landräte"
     numbering:
       type: "article"
-      prefix: "BayGLKrWG-"
+      prefix: "BayGLKrWG"
       start: 1
       end: 61
 
@@ -65,6 +65,46 @@ laws:
     name: "Wahlordnung für die Gemeinde- und die Landkreiswahlen"
     numbering:
       type: "article"
-      prefix: "BayGLKrWO-"
+      prefix: "BayGLKrWO"
       start: 1
       end: 103
+
+  - id: "LStVG"
+    name: "Gesetz über das Landesstrafrecht und das Verordnungsrecht auf dem Gebiet der öffentlichen Sicherheit und Ordnung"
+    numbering:
+      type: "article"
+      prefix: "BayLStVG"
+      start: 1
+      end: 62
+
+  - id: "LWG"
+    name: "Gesetz über Landtagswahl, Volksbegehren und Volksentscheid"
+    numbering:
+      type: "article"
+      prefix: "BayLWG"
+      start: 1
+      end: 93
+
+  - id: "FTG"
+    name: "Gesetz über den Schutz der Sonn- und Feiertage"
+    numbering:
+      type: "article"
+      prefix: "BayFTG"
+      start: 1
+      end: 9
+
+  - id: "KG"
+    name: "Kostengesetz"
+    numbering:
+      type: "article"
+      prefix: "BayKG"
+      start: 1
+      end: 28
+
+  - id: "KAG"
+    name: "Kommunalabgabengesetz"
+    numbering:
+      type: "article"
+      prefix: "BayKAG"
+      start: 1
+      end: 21

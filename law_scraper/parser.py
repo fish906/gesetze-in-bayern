@@ -58,7 +58,6 @@ def parse_norm(html):
                         content_parts.append("<ol>" + "\n".join(list_items) + "</ol>")
                     i += 1 
 
-        # Liste ohne vorherigen Absatz (z. B. am Ende)
         elif getattr(child, 'name', None) == 'dl':
             list_items = []
             for dt in child.find_all('dt'):
@@ -81,3 +80,18 @@ def parse_norm(html):
         'content': content_html,
         'references': []
     }
+
+def parse_overview(html):
+    soup = BeautifulSoup(html, 'html.parser')
+
+    date_div = soup.find('div', string=re.compile(r'Text gilt ab:'))
+    if not date_div:
+        return None
+
+    text = date_div.get_text(strip=True)
+
+    m = re.search(r'\d{2}\.\d{2}\.\d{4}', text)
+    if m:
+        return m.group(0)
+
+    return None

@@ -58,10 +58,19 @@ def main():
         old_date = current_law.get('last_modified')
 
         if old_date == new_date:
-            print(f"Keine Änderung ({new_date}), überspringe {law['name']}.")
+            print(f"Keine Änderung ({new_date}), überspringe {law['name']}.\n")
+            if old_date is None:
+                update_law_date(conn, law_id, new_date)
+                print(f"Datum erstmals gespeichert: {new_date}")
             continue
 
-        print(f"Änderung gefunden! Alt: {old_date} → Neu: {new_date}")
+        if old_date is None:
+            print(f"Datum wird erstmals eingefügt: {new_date}")
+            
+        else:
+            print(f"Änderung gefunden! Alt: {old_date} → Neu: {new_date}")
+            
+        update_law_date(conn, law_id, new_date)
 
         start = law['numbering']['start']
         end = law['numbering']['end']
@@ -84,9 +93,6 @@ def main():
                     print(f"Fehler beim Laden {url}: {e}, Versuch {attempt+1}/{retries}")
                     time.sleep(delay)
             time.sleep(delay)
-
-        update_law_date(conn, law_id, new_date)
-        print(f"Datum aktualisiert auf {new_date}")
 
     conn.close()
 

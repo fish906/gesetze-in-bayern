@@ -7,18 +7,16 @@ import logging
 logger = logging.getLogger("law_scraper.db")
 logger.setLevel(logging.DEBUG)
 
-# Konsole
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)  # Du kannst INFO oder DEBUG setzen
+console_handler.setLevel(logging.INFO) 
 
-# Format
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s | %(name)s | %(message)s")
 console_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 
 def load_db_config(path="config.yml"):
-    base_dir = os.path.dirname(os.path.dirname(__file__))  # geht von law_scraper auf law_app
+    base_dir = os.path.dirname(os.path.dirname(__file__))
     path = os.path.join(base_dir, 'config.yml')
     
     if not os.path.exists(path):
@@ -120,6 +118,29 @@ def save_norm(conn, data):
         ))
         logger.info(f"Eingefügt: law_id={data['law_id']}, number={data['number']}")
 
+    conn.commit()
+
+def get_law_by_id(conn, law_id):
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, name, last_modified FROM laws WHERE id = %s",
+        (law_id,)
+    )
+    row = cursor.fetchone()
+    if row:
+        return {
+            'id': row[0],
+            'name': row[1],
+            'last_modified': row[2]
+        }
+    return None
+
+def update_law_date(conn, law_id, new_date):
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE laws SET last_modified = %s WHERE id = %s",
+        (new_date, law_id)
+    )
     conn.commit()
 
 def close_db(conn):
