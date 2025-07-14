@@ -140,3 +140,43 @@ laws:
       prefix: "BayKommZG"
       start: 1
       end: 55
+
+  - id: "BayVerfGHG"
+    name: "Gesetz über den Bayerischen Verfassungsgerichtshof"
+    numbering:
+      type: "article"
+      prefix: "BayVfGHG"
+      start: 1
+      end: 57
+
+  - id: "BayVersG"
+    name: "Bayerisches Versammlungsgesetz"
+    numbering:
+      type: "article"
+      prefix: "BayVersG"
+      start: 1
+      end: 28
+
+  - id: "GerOrgG"
+    name: "Gesetz über die Organisation der ordentlichen Gerichte im Freistaat Bayern"
+    numbering:
+      type: "article"
+      prefix: "BayGerOrgG"
+      start: 1
+      end: 6
+
+  - id: "BayGSG"
+    name: "Gesetz zum Schutz der Gesundheit"
+    numbering:
+      type: "article"
+      prefix: "BayGSG"
+      start: 1
+      end: 11
+
+  - id: "ZustV"
+    name: "Zuständigkeitsverordnunung"
+    numbering:
+      type: "article"
+      prefix: "BayZustV"
+      start: 1
+      end: 100
