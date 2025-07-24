@@ -1,0 +1,25 @@
+laws:
+- id: abc
+  name: ''
+  numbering:
+    type: article
+    prefix: dasadf
+    start: 1
+    end: 12
+- ? '
+
+    id'
+  : Bafdf
+  name: df
+  numbering:
+    type: article
+    prefix: sfg
+    start: 1
+    end: 12
+- id: "BayVersG"
+  name: df
+  numbering:
+    type: article
+    prefix: sdf
+    start: 1
+    end: 12

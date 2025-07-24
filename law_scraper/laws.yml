@@ -5,11 +5,11 @@ global:
   delay_between_requests: 0.5
 
 laws:
-  - id: "BayVwVfG"
-    name: "Bayerisches Verwaltungsverfahrensgesetz"
+  - id: BayVwVfG
+    name: Bayerisches Verwaltungsverfahrensgesetz
     numbering:
-      type: "article"
-      prefix: "BayVwVfG"
+      type: article
+      prefix: BayVwVfG
       start: 1
       end: 100
 
