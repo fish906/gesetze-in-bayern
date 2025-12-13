@@ -83,7 +83,7 @@ def save_norm(conn, data):
             return 
 
         sql_update = """
-            UUPDATE norms
+            UPDATE norms
             SET number_raw = %s, title = %s, content = %s, url = %s, content_hash = %s, last_seen = %s
             WHERE law_id = %s AND number = %s
         """
