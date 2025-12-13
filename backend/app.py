@@ -1,9 +1,12 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 from flask_cors import CORS
-import pymysql
 
 import sys
 import os
+import json
+from db import save_norm, init_db, get_or_create_law  
+
+from db import save_norm, init_db, get_or_create_law  
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'law_scraper')))
 from db import init_db
@@ -11,34 +14,25 @@ from db import init_db
 app = Flask(__name__)
 CORS(app)
 
-from flask import Response
-import json
+conn = init_db
 
-@app.route("/api/article-one")
-def article_one():
-    conn = init_db()
-    try:
-        with conn.cursor() as c:
-            c.execute("""
-                SELECT n.number, n.title, n.content
-                FROM norms n
-                JOIN laws l ON n.law_id = l.id
-                WHERE l.name = %s AND n.number= %s
-                LIMIT 1
-            """, ('BayGO', 'Art. 6'))
-            row = c.fetchone()
-        if not row:
-            return jsonify({"error": "Not found"}), 404
+@app.route("/api/laws")
+def get_laws():
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM laws ORDER BY name ASC")
+    rows = cursor.fetchall()
+    laws = [{"id": row[0], "name": row[1]} for row in rows]
+    return jsonify(laws)
 
-        payload = {
-            "number": row[0],
-            "title": row[1],
-            "content": row[2]
-        }
-        return Response(json.dumps(payload), mimetype='application/json')
-    finally:
-        conn.close()
+@app.route("/api/laws/<int:law_id>/norms")
+def get_norms_by_law(law_id):
+    # returns all norms for the given law
+    return jsonify(fetch_norms_by_law(law_id))
 
+@app.route("/api/norms/<int:norm_id>")
+def get_norm(norm_id):
+    # returns full norm data (number, title, content)
+    return jsonify(fetch_norm_by_id(norm_id))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

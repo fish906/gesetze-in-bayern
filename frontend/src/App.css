@@ -64,3 +64,20 @@ body {
   margin-top: 3rem;
   color: #666;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  text-align: left;
+}
+
+button:hover {
+  text-decoration: underline;
+}
