@@ -9,7 +9,7 @@ logger = logging.getLogger("law_scraper.db")
 logger.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)  # Du kannst INFO oder DEBUG setzen
+console_handler.setLevel(logging.INFO)  # options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 # logging formatting
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s | %(name)s | %(message)s")
@@ -22,13 +22,13 @@ def load_db_config(path="config.yml"):
     path = os.path.join(base_dir, 'config.yml')
     
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Config-Datei nicht gefunden: {path}")
+        raise FileNotFoundError(f"config file not found: {path}")
 
     with open(path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
     if 'database' not in config:
-        raise KeyError("In der config.yaml fehlt der Abschnitt 'database'")
+        raise KeyError("config.yaml is missing 'database' section")
 
     return config['database']
 
@@ -43,7 +43,7 @@ def init_db():
         charset='utf8mb4',
         autocommit=False
     )
-    logger.info("Datenbankverbindung hergestellt.")
+    logger.info("connected to database")
     return conn
 
 def get_or_create_law(conn, law_identifier, law_description):
@@ -68,8 +68,6 @@ def hash_content(content):
     return hashlib.md5(content.encode('utf-8')).hexdigest()
 
 def save_norm(conn, data):
-    cursor = conn.cursor()
-
     # Default last_seen to today if not provided
     if 'last_seen' not in data or not data['last_seen']:
         data['last_seen'] = date.today().isoformat()
@@ -77,61 +75,62 @@ def save_norm(conn, data):
     if 'content_hash' not in data or not data['content_hash']:
         data['content_hash'] = hash_content(data['content'])
 
-    sql_select = """
-    SELECT content_hash FROM norms WHERE law_id = %s AND number = %s
-    """
-    cursor.execute(sql_select, (data['law_id'], data['number']))
-    result = cursor.fetchone()
-
-    if result:
-        existing_hash = result[0]
-        if existing_hash == data['content_hash']:
-            # Content unchanged, but still update last_seen to mark as active
-            cursor.execute(
-                "UPDATE norms SET last_seen = %s WHERE law_id = %s AND number = %s",
-                (data['last_seen'], data['law_id'], data['number'])
-            )
-            conn.commit()
-            logger.debug(f"Unverändert: law_id={data['law_id']}, number={data['number']}")
-            return 
-
-        sql_update = """
-            UPDATE norms
-            SET number_raw = %s, title = %s, content = %s, url = %s, content_hash = %s, last_seen = %s
-            WHERE law_id = %s AND number = %s
+    with conn.cursor() as cursor:
+        sql_select = """
+        SELECT content_hash FROM norms WHERE law_id = %s AND number = %s
         """
+        cursor.execute(sql_select, (data['law_id'], data['number']))
+        result = cursor.fetchone()
 
-        cursor.execute(sql_update, (
-            data['number_raw'],
-            data['title'],
-            data['content'],
-            data['url'],
-            data['content_hash'],
-            data['last_seen'],
-            data['law_id'],
-            data['number'],
-        ))
-        logger.info(f"Aktualisiert: law_id={data['law_id']}, number={data['number']}")
+        if result:
+            existing_hash = result[0]
+            if existing_hash == data['content_hash']:
+                # Content unchanged, but still update last_seen to mark as active
+                cursor.execute(
+                    "UPDATE norms SET last_seen = %s WHERE law_id = %s AND number = %s",
+                    (data['last_seen'], data['law_id'], data['number'])
+                )
+                conn.commit()
+                logger.debug(f"Unverändert: law_id={data['law_id']}, number={data['number']}")
+                return 
 
-    else:
-        sql_insert = """
-        INSERT INTO norms (law_id, number, number_raw, title, content, url, content_hash, last_seen)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
+            sql_update = """
+                UPDATE norms
+                SET number_raw = %s, title = %s, content = %s, url = %s, content_hash = %s, last_seen = %s
+                WHERE law_id = %s AND number = %s
+            """
 
-        cursor.execute(sql_insert, (
-            data['law_id'],
-            data['number'],
-            data['number_raw'],
-            data['title'],
-            data['content'],
-            data['url'],
-            data['content_hash'],
-            data['last_seen']
-        ))
-        logger.info(f"Eingefügt: law_id={data['law_id']}, number={data['number']}")
+            cursor.execute(sql_update, (
+                data['number_raw'],
+                data['title'],
+                data['content'],
+                data['url'],
+                data['content_hash'],
+                data['last_seen'],
+                data['law_id'],
+                data['number'],
+            ))
+            logger.info(f"Aktualisiert: law_id={data['law_id']}, number={data['number']}")
 
-    conn.commit()
+        else:
+            sql_insert = """
+            INSERT INTO norms (law_id, number, number_raw, title, content, url, content_hash, last_seen)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+
+            cursor.execute(sql_insert, (
+                data['law_id'],
+                data['number'],
+                data['number_raw'],
+                data['title'],
+                data['content'],
+                data['url'],
+                data['content_hash'],
+                data['last_seen']
+            ))
+            logger.info(f"Eingefügt: law_id={data['law_id']}, number={data['number']}")
+
+        conn.commit()
 
 def flag_stale_norms(conn, law_id, current_date):
     """Flag norms that were not seen in the current scrape run.

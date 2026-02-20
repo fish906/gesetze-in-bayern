@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 import re
+import logging
+
+logger = logging.getLogger("law_scraper.parser")
 
 SUPERSCRIPT_MAP = {
     '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
@@ -21,11 +24,22 @@ def extract_text_with_sup(elem):
             
     return ''.join(parts).strip()
 
+class ParseError(Exception):
+    """Raised when a page does not contain the expected norm structure."""
+    pass
+
 def parse_norm(html):
     soup = BeautifulSoup(html, 'html.parser')
 
     para_heading = soup.find('div', class_='paraheading')
-    number_text = para_heading.find('div', class_='paranr').get_text(strip=True)
+    if not para_heading:
+        raise ParseError("No 'paraheading' div found — page may not contain a norm")
+
+    paranr_div = para_heading.find('div', class_='paranr')
+    if not paranr_div:
+        raise ParseError("No 'paranr' div found within paraheading")
+
+    number_text = paranr_div.get_text(strip=True)
     number_raw_match = re.search(r'(\d+[a-z]?)', number_text, re.IGNORECASE)
     number_raw = number_raw_match.group(1) if number_raw_match else number_text
 
@@ -34,6 +48,16 @@ def parse_norm(html):
 
     content_parts = []
     container = soup.find('div', class_='cont')
+    if not container:
+        logger.warning(f"No 'cont' div found for norm '{number_text}' — content will be empty")
+        return {
+            'number': number_text,
+            'number_raw': number_raw,
+            'title': title,
+            'content': '',
+            'references': []
+        }
+
     children = list(container.children)
 
     i = 0

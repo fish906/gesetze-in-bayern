@@ -169,7 +169,7 @@ laws:
     name: "Gesetz zum Schutz der Gesundheit-"
     numbering:
       type: "article"
-      prefix: "BayGSG"
+      prefix: "BayGSG-"
       start: 1
       end: 11
 
