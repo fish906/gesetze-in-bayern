@@ -9,7 +9,7 @@ laws:
     name: Bayerisches Verwaltungsverfahrensgesetz
     numbering:
       type: article
-      prefix: BayVwVfG
+      prefix: BayVwVfG-
       start: 1
       end: 100
 
@@ -17,7 +17,7 @@ laws:
     name: "Bayerische Bauordnung"
     numbering:
         type: "article"
-        prefix: "BayBO"
+        prefix: "BayBO-"
         start: 1
         end: 81 
 
@@ -25,7 +25,7 @@ laws:
     name: "Gemeindeordnung für den Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayGO"
+      prefix: "BayGO-"
       start: 1
       end: 122
 
@@ -33,7 +33,7 @@ laws:
     name: "Bayerisches Verwaltungszustellungs- und Vollstreckungsgesetz"
     numbering:
       type: "article"
-      prefix: "BayVwZVG"
+      prefix: "BayVwZVG-"
       start: 1
       end: 45
 
@@ -41,7 +41,7 @@ laws:
     name: "Ausbildungs- und Prüfungsordnung für Juristen"
     numbering:
       type: "article"
-      prefix: "BayJAPO"
+      prefix: "BayJAPO-"
       start: 1
       end: 73
       
@@ -49,7 +49,7 @@ laws:
     name: "Landkreisordnung für den Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayLKrO"
+      prefix: "BayLKrO-"
       start: 1
       end: 108
 
@@ -57,7 +57,7 @@ laws:
     name: "Gesetz über die Wahl der Gemeinderäte, der Bürgermeister, der Kreistage und der Landräte"
     numbering:
       type: "article"
-      prefix: "BayGLKrWG"
+      prefix: "BayGLKrWG-"
       start: 1
       end: 61
 
@@ -65,7 +65,7 @@ laws:
     name: "Wahlordnung für die Gemeinde- und die Landkreiswahlen"
     numbering:
       type: "article"
-      prefix: "BayGLKrWO"
+      prefix: "BayGLKrWO-"
       start: 1
       end: 103
 
@@ -73,7 +73,7 @@ laws:
     name: "Gesetz über das Landesstrafrecht und das Verordnungsrecht auf dem Gebiet der öffentlichen Sicherheit und Ordnung"
     numbering:
       type: "article"
-      prefix: "BayLStVG"
+      prefix: "BayLStVG-"
       start: 1
       end: 62
 
@@ -81,7 +81,7 @@ laws:
     name: "Gesetz über Landtagswahl, Volksbegehren und Volksentscheid"
     numbering:
       type: "article"
-      prefix: "BayLWG"
+      prefix: "BayLWG-"
       start: 1
       end: 93
 
@@ -89,7 +89,7 @@ laws:
     name: "Gesetz über den Schutz der Sonn- und Feiertage"
     numbering:
       type: "article"
-      prefix: "BayFTG"
+      prefix: "BayFTG-"
       start: 1
       end: 9
 
@@ -97,7 +97,7 @@ laws:
     name: "Kostengesetz"
     numbering:
       type: "article"
-      prefix: "BayKG"
+      prefix: "BayKG-"
       start: 1
       end: 28
 
@@ -105,7 +105,7 @@ laws:
     name: "Kommunalabgabengesetz"
     numbering:
       type: "article"
-      prefix: "BayKAG"
+      prefix: "BayKAG-"
       start: 1
       end: 21
       
@@ -113,7 +113,7 @@ laws:
     name: "Verfassung des Freistaates Bayern in der Fassung der Bekanntmachung vom 15. Dezember 1998"
     numbering:
       type: "article"
-      prefix: "BayVerf"
+      prefix: "BayVerf-"
       start: 1
       end: 188
 
@@ -121,7 +121,7 @@ laws:
     name: "Verwaltungsgemeinschaftsordnung für den Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayVGemO"
+      prefix: "BayVGemO-"
       start: 1
       end: 12
 
@@ -129,7 +129,7 @@ laws:
     name: "Gesetz über die Landesvermessung und das Liegenschaftskataster"
     numbering:
       type: "article"
-      prefix: "BayVermKatG"
+      prefix: "BayVermKatG-"
       start: 1
       end: 16
 
@@ -137,7 +137,7 @@ laws:
     name: "Gesetz über die kommunale Zusammenarbeit"
     numbering:
       type: "article"
-      prefix: "BayKommZG"
+      prefix: "BayKommZG-"
       start: 1
       end: 55
 
@@ -145,7 +145,7 @@ laws:
     name: "Gesetz über den Bayerischen Verfassungsgerichtshof"
     numbering:
       type: "article"
-      prefix: "BayVfGHG"
+      prefix: "BayVfGHG-"
       start: 1
       end: 57
 
@@ -153,7 +153,7 @@ laws:
     name: "Bayerisches Versammlungsgesetz"
     numbering:
       type: "article"
-      prefix: "BayVersG"
+      prefix: "BayVersG-"
       start: 1
       end: 28
 
@@ -161,12 +161,12 @@ laws:
     name: "Gesetz über die Organisation der ordentlichen Gerichte im Freistaat Bayern"
     numbering:
       type: "article"
-      prefix: "BayGerOrgG"
+      prefix: "BayGerOrgG-"
       start: 1
       end: 6
 
   - id: "BayGSG"
-    name: "Gesetz zum Schutz der Gesundheit"
+    name: "Gesetz zum Schutz der Gesundheit-"
     numbering:
       type: "article"
       prefix: "BayGSG"
@@ -177,6 +177,6 @@ laws:
     name: "Zuständigkeitsverordnunung"
     numbering:
       type: "article"
-      prefix: "BayZustV"
+      prefix: "BayZustV-"
       start: 1
       end: 100
