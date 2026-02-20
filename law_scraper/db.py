@@ -3,13 +3,15 @@ import yaml
 import os
 import hashlib
 import logging
+from datetime import date
 
 logger = logging.getLogger("law_scraper.db")
 logger.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO) 
+console_handler.setLevel(logging.INFO)  # Du kannst INFO oder DEBUG setzen
 
+# logging formatting
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s | %(name)s | %(message)s")
 console_handler.setFormatter(formatter)
 
@@ -62,10 +64,15 @@ def get_or_create_law(conn, law_identifier, law_description):
             return law_id
 
 def hash_content(content):
-    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+    """Hash content using MD5 (consistent with scraper.py)."""
+    return hashlib.md5(content.encode('utf-8')).hexdigest()
 
 def save_norm(conn, data):
     cursor = conn.cursor()
+
+    # Default last_seen to today if not provided
+    if 'last_seen' not in data or not data['last_seen']:
+        data['last_seen'] = date.today().isoformat()
 
     if 'content_hash' not in data or not data['content_hash']:
         data['content_hash'] = hash_content(data['content'])
@@ -79,6 +86,12 @@ def save_norm(conn, data):
     if result:
         existing_hash = result[0]
         if existing_hash == data['content_hash']:
+            # Content unchanged, but still update last_seen to mark as active
+            cursor.execute(
+                "UPDATE norms SET last_seen = %s WHERE law_id = %s AND number = %s",
+                (data['last_seen'], data['law_id'], data['number'])
+            )
+            conn.commit()
             logger.debug(f"Unverändert: law_id={data['law_id']}, number={data['number']}")
             return 
 
@@ -94,9 +107,9 @@ def save_norm(conn, data):
             data['content'],
             data['url'],
             data['content_hash'],
+            data['last_seen'],
             data['law_id'],
             data['number'],
-            data['last_seen']
         ))
         logger.info(f"Aktualisiert: law_id={data['law_id']}, number={data['number']}")
 
@@ -120,28 +133,31 @@ def save_norm(conn, data):
 
     conn.commit()
 
-def get_law_by_id(conn, law_id):
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT id, name, last_modified FROM laws WHERE id = %s",
-        (law_id,)
-    )
-    row = cursor.fetchone()
-    if row:
-        return {
-            'id': row[0],
-            'name': row[1],
-            'last_modified': row[2]
-        }
-    return None
+def flag_stale_norms(conn, law_id, current_date):
+    """Flag norms that were not seen in the current scrape run.
+    
+    Sets is_stale = 1 for norms whose last_seen is older than current_date.
+    Returns the number of norms flagged.
+    """
+    with conn.cursor() as cursor:
+        sql = """
+            UPDATE norms
+            SET is_stale = 1
+            WHERE law_id = %s AND (last_seen < %s OR last_seen IS NULL)
+        """
+        cursor.execute(sql, (law_id, current_date))
+        stale_count = cursor.rowcount
 
-def update_law_date(conn, law_id, new_date):
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE laws SET last_modified = %s WHERE id = %s",
-        (new_date, law_id)
-    )
-    conn.commit()
+        # Unflag norms that were seen today (in case they were previously stale)
+        sql_unflag = """
+            UPDATE norms
+            SET is_stale = 0
+            WHERE law_id = %s AND last_seen = %s AND is_stale = 1
+        """
+        cursor.execute(sql_unflag, (law_id, current_date))
+
+        conn.commit()
+        return stale_count
 
 def close_db(conn):
     try:
