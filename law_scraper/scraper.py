@@ -5,7 +5,7 @@ import requests
 import hashlib
 import logging
 from datetime import date
-from .parser import parse_norm
+from .parser import parse_norm, ParseError
 from .db import save_norm, init_db, get_or_create_law, close_db, flag_stale_norms
 
 logger = logging.getLogger("law_scraper.scraper")
@@ -18,31 +18,30 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 REQUEST_TIMEOUT = 15  # seconds
-
-# Resolve laws.yml relative to this file, not CWD
 _dir = os.path.dirname(os.path.abspath(__file__))
-with open(os.path.join(_dir, 'laws.yml'), 'r', encoding='utf-8') as f:
-    config = yaml.safe_load(f)
-
-BASE_URL = config['base_url']
-GLOBAL_RETRIES = config.get('global', {}).get('retries', 3)
-DELAY = config.get('global', {}).get('delay_between_requests', 0.3)
 
 
-def scrape_norm(session, url, prefix, number, db_law_id, conn):
+def load_config():
+    """Load laws.yml from the package directory."""
+    path = os.path.join(_dir, 'laws.yml')
+    with open(path, 'r', encoding='utf-8') as f:
+        return yaml.safe_load(f)
+
+
+def scrape_norm(session, url, prefix, number, db_law_id, conn, retries):
     """Fetch and store a single norm. Returns True on success, False on skip/not found."""
     tries = 0
-    while tries < GLOBAL_RETRIES:
+    while tries < retries:
         try:
             response = session.get(url, timeout=REQUEST_TIMEOUT)
         except requests.exceptions.Timeout:
             tries += 1
-            logger.warning(f"Timeout for {url}, retry {tries}/{GLOBAL_RETRIES}")
+            logger.warning(f"Timeout for {url}, retry {tries}/{retries}")
             time.sleep(2)
             continue
         except requests.exceptions.ConnectionError as e:
             tries += 1
-            logger.warning(f"Connection error for {url}: {e}, retry {tries}/{GLOBAL_RETRIES}")
+            logger.warning(f"Connection error for {url}: {e}, retry {tries}/{retries}")
             time.sleep(2)
             continue
         except requests.exceptions.RequestException as e:
@@ -52,6 +51,9 @@ def scrape_norm(session, url, prefix, number, db_law_id, conn):
         if response.status_code == 200:
             try:
                 data = parse_norm(response.text)
+            except ParseError as e:
+                logger.debug(f"Skipping {url}: {e}")
+                return False
             except Exception as e:
                 logger.error(f"Parsing failed for {url}: {e}")
                 return False
@@ -82,7 +84,7 @@ def scrape_norm(session, url, prefix, number, db_law_id, conn):
             return False
         else:
             tries += 1
-            logger.warning(f"HTTP {response.status_code} for {url}, retry {tries}/{GLOBAL_RETRIES}")
+            logger.warning(f"HTTP {response.status_code} for {url}, retry {tries}/{retries}")
             time.sleep(2)
 
     logger.error(f"Max retries reached for {url}")
@@ -92,6 +94,11 @@ def scrape_norm(session, url, prefix, number, db_law_id, conn):
 def main():
     conn = None
     try:
+        config = load_config()
+        base_url = config['base_url']
+        retries = config.get('global', {}).get('retries', 3)
+        delay = config.get('global', {}).get('delay_between_requests', 0.3)
+
         conn = init_db()
         session = requests.Session()
 
@@ -114,10 +121,10 @@ def main():
             today = date.today().isoformat()
 
             for number in range(start, end + 1):
-                url = f"{BASE_URL}/{prefix}{number}"
+                url = f"{base_url}/{prefix}{number}"
                 logger.debug(f"Requesting: {url}")
-                scrape_norm(session, url, prefix, number, db_law_id, conn)
-                time.sleep(DELAY)
+                scrape_norm(session, url, prefix, number, db_law_id, conn, retries)
+                time.sleep(delay)
 
             try:
                 stale_count = flag_stale_norms(conn, db_law_id, today)
