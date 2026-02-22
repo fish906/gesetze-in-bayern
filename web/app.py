@@ -25,6 +25,21 @@ BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
 
 _start_time = _time.time()
 
+# Caching
+_cache = {}
+CACHE_TTL = int(os.environ.get("CACHE_TTL", 3600))  # Cache time-to-live in seconds
+
+def cache_get(key):
+    """Get a cached value if it exists and hasn't expired."""
+    entry = _cache.get(key)
+    if entry and (_time.time() - entry["time"]) < CACHE_TTL:
+        return entry["value"]
+    return None
+
+def cache_set(key, value):
+    """Store a value in cache with current timestamp."""
+    _cache[key] = {"value": value, "time": _time.time()}
+
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
 _root = os.path.dirname(_dir)
@@ -95,8 +110,16 @@ def get_connection():
 @app.get("/favicon.ico")
 async def favicon():
     """Serve favicon for non-HTML pages."""
+
+    cache_key = "favicon"
+    cached = cache_get(cache_key)
+    if cached:
+        logger.info("Serving favicon from cache")
+        return FileResponse(cached, media_type="image/x-icon")
+    
     path = os.path.join(_dir, "static", "favicon.ico")
     if os.path.exists(path):
+        cache_set(cache_key, path)
         return FileResponse(path, media_type="image/x-icon")
     return Response(status_code=204)
 
@@ -161,6 +184,13 @@ async def health_check():
 @app.get("/", response_class=HTMLResponse)
 async def law_index(request: Request):
     """Display all available laws."""
+
+    cache_key = "law_index"
+    cached = cache_get(cache_key)
+    if cached:
+        logger.info("Serving law index from cache")
+        return HTMLResponse(cached)
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -171,15 +201,23 @@ async def law_index(request: Request):
     finally:
         conn.close()
 
-    return templates.TemplateResponse("index.html", {
+    response = templates.TemplateResponse("index.html", {
         "request": request,
         "laws": laws,
     })
+    cache_set(cache_key, response.body.decode("utf-8"))
 
+    return response
 
 @app.get("/gesetz/{law_name}", response_class=HTMLResponse)
 async def law_toc(request: Request, law_name: str):
     """Display table of contents for a specific law."""
+
+    cache_key = f"toc_{law_name}"
+    cached = cache_get(cache_key)
+    if cached:
+        return HTMLResponse(cached)
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -203,16 +241,23 @@ async def law_toc(request: Request, law_name: str):
     finally:
         conn.close()
 
-    return templates.TemplateResponse("toc.html", {
+    response = templates.TemplateResponse("toc.html", {
         "request": request,
         "law": law,
         "norms": norms,
-    })
+    })  
+
+    return response
 
 
 @app.get("/gesetz/{law_name}/gesamt", response_class=HTMLResponse)
 async def law_full_view(request: Request, law_name: str):
     """Display all norms of a law on a single page."""
+    cache_key = f"full_view_{law_name}"
+    cached = cache_get(cache_key)
+    if cached:
+        return HTMLResponse(cached)
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -236,16 +281,26 @@ async def law_full_view(request: Request, law_name: str):
     finally:
         conn.close()
 
-    return templates.TemplateResponse("full_view.html", {
+    response = templates.TemplateResponse("full_view.html", {
         "request": request,
         "law": law,
         "norms": norms,
     })
+    cache_set(cache_key, response.body.decode("utf-8"))
+    
+    return response
 
 
 @app.get("/gesetz/{law_name}/{norm_number}", response_class=HTMLResponse)
 async def norm_detail(request: Request, law_name: str, norm_number: str):
     """Display the full content of a single norm."""
+
+    cache_key = f"norm_{law_name}_{norm_number}"
+    cached = cache_get(cache_key)
+    if cached:
+        logger.info(f"Serving norm {law_name} {norm_number} from cache")
+        return HTMLResponse(cached)
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -318,7 +373,7 @@ async def norm_detail(request: Request, law_name: str, norm_number: str):
     finally:
         conn.close()
 
-    return templates.TemplateResponse("norm.html", {
+    response = templates.TemplateResponse("norm.html", {
         "request": request,
         "law": law,
         "norm": norm,
@@ -327,11 +382,19 @@ async def norm_detail(request: Request, law_name: str, norm_number: str):
         "prev_norms": prev_norms,
         "next_norms": next_norms,
     })
+    cache_set(cache_key, response.body.decode("utf-8"))
 
+    return response
 
 @app.get("/sitemap.xml")
 async def sitemap():
-    """Generate sitemap.xml from database content."""
+    """Generate sitemap.xml from database content (cached)."""
+
+    cached = cache_get("sitemap")
+    if cached:
+        #logger.info("Serving sitemap.xml from cache")
+        return Response(content=cached, media_type="application/xml")
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
@@ -377,6 +440,8 @@ async def sitemap():
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "\n".join(urls)
     xml += "\n</urlset>"
+
+    cache_set("sitemap", xml)
 
     return Response(content=xml, media_type="application/xml")
 
