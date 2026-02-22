@@ -10,11 +10,65 @@
     <meta property="og:description" content="{% block og_description %}Bayerische Landesgesetze und Verordnungen{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="BayRecht">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <style>
+        /* ── Local Fonts ── */
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-300.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-italic.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-600.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-700.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-500.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-600.woff2') format('woff2');
+        }
         :root {
             --color-bg: #FAFAF7;
             --color-surface: #FFFFFF;

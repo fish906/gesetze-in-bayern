@@ -11,8 +11,42 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Sitemap — BayRecht</title>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <style>
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Crimson Pro';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('/static/fonts/crimson-pro-v28-latin-700.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-500.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'DM Sans';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('/static/fonts/dm-sans-v17-latin-600.woff2') format('woff2');
+        }
         :root {
             --color-bg: #FAFAF7;
             --color-surface: #FFFFFF;
