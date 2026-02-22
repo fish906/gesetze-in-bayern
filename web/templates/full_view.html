@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ law.name }} — Gesamtansicht — BayRecht{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/">Gesetze</a>
+    <span class="sep">/</span>
+    <a href="/gesetz/{{ law.name }}">{{ law.name }}</a>
+    <span class="sep">/</span>
+    Gesamtansicht
+</nav>
+
+<div class="page-heading">
+    <h1>{{ law.name }}</h1>
+    <p class="subtitle">{{ law.description }} — Gesamtansicht ({{ norms | length }} Artikel)</p>
+    <button onclick="window.print()" class="print-button">🖨 Drucken</button>
+</div>
+
+{% if norms %}
+<div class="full-view">
+    {% for norm in norms %}
+    <article class="full-view-article" id="art-{{ norm.number }}">
+        <header class="full-view-header">
+            <a href="/gesetz/{{ law.name }}/{{ norm.number }}" class="full-view-label">Art. {{ norm.number }}</a>
+            {% if norm.title %}
+            <h2>{{ norm.title }}</h2>
+            {% endif %}
+        </header>
+
+        <div class="norm-content">
+            {{ norm.content | safe }}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Keine Normen für dieses Gesetz vorhanden.</p>
+</div>
+{% endif %}
+{% endblock %}

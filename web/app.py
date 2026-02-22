@@ -136,6 +136,39 @@ async def law_toc(request: Request, law_name: str):
     })
 
 
+@app.get("/gesetz/{law_name}/gesamt", response_class=HTMLResponse)
+async def law_full_view(request: Request, law_name: str):
+    """Display all norms of a law on a single page."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, name, description FROM laws WHERE name = %s",
+                (law_name,)
+            )
+            law = cursor.fetchone()
+
+            if not law:
+                raise HTTPException(status_code=404, detail="Gesetz nicht gefunden")
+
+            cursor.execute(
+                """SELECT number, number_raw, title, content
+                   FROM norms
+                   WHERE law_id = %s AND (is_stale = 0 OR is_stale IS NULL)
+                   ORDER BY CAST(number AS UNSIGNED), number""",
+                (law["id"],)
+            )
+            norms = cursor.fetchall()
+    finally:
+        conn.close()
+
+    return templates.TemplateResponse("full_view.html", {
+        "request": request,
+        "law": law,
+        "norms": norms,
+    })
+
+
 @app.get("/gesetz/{law_name}/{norm_number}", response_class=HTMLResponse)
 async def norm_detail(request: Request, law_name: str, norm_number: str):
     """Display the full content of a single norm."""

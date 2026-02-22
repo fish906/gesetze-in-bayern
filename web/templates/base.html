@@ -122,6 +122,39 @@
             color: var(--color-text-secondary);
         }
 
+        .full-view-link {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.85rem;
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .full-view-link:hover {
+            color: var(--color-accent-hover);
+        }
+
+        .print-button {
+            display: inline-block;
+            margin-top: 0.6rem;
+            padding: 0.4rem 1rem;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-accent);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .print-button:hover {
+            background: var(--color-highlight);
+            border-color: var(--color-accent);
+        }
+
         /* ── Law list (index page) ── */
         .law-list {
             list-style: none;
@@ -439,6 +472,63 @@
             color: var(--color-accent);
         }
 
+        /* ── Full view ── */
+        .full-view {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .full-view-article {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-bottom: none;
+            padding: 2rem 2.5rem;
+        }
+
+        .full-view-article:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .full-view-article:last-child {
+            border-bottom: 1px solid var(--color-border);
+            border-radius: 0 0 6px 6px;
+        }
+
+        .full-view-article:only-child {
+            border-radius: 6px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .full-view-header {
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--color-border-light);
+        }
+
+        .full-view-label {
+            display: inline-block;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--color-accent);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.2rem;
+        }
+
+        .full-view-label:hover {
+            color: var(--color-accent-hover);
+        }
+
+        .full-view-header h2 {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
         /* ── Error page ── */
         .error-page {
             text-align: center;
@@ -549,6 +639,54 @@
             .norm-sidebar {
                 position: static;
                 order: -1;
+            }
+
+            .full-view-article {
+                padding: 1.5rem 1.2rem;
+            }
+        }
+        /* ── Print ── */
+        @media print {
+            header, footer, .breadcrumb, .norm-nav,
+            .norm-sidebar, .print-button, .full-view-link {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+                font-size: 11pt;
+            }
+
+            main {
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .norm-page {
+                display: block;
+                max-width: 100%;
+            }
+
+            .norm-detail, .full-view-article {
+                border: none;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .full-view-article {
+                page-break-inside: avoid;
+                padding: 0.8rem 0;
+                border-bottom: 1px solid #ccc !important;
+            }
+
+            .full-view-article:last-child {
+                border-bottom: none !important;
+            }
+
+            a {
+                color: black;
+                text-decoration: none;
             }
         }
     </style>

@@ -2,16 +2,48 @@ base_url: "https://www.gesetze-bayern.de/Content/Document"
 
 global:
   retries: 3
-  delay_between_requests: 0.5
+  delay_between_requests: 0.2
 
 laws:
+  - id: AbmG
+    name: Gesetz über die Abmarkung der Grundstücke
+    numbering:
+      type: article
+      prefix: BayAbmG-
+      start: 1
+      end: 25
+
+  - id: Almgesetz
+    name: Gesetz über den Schutz der Almen und die Förderung der Almwirtschaft
+    numbering:
+      type: article
+      prefix: BayAlmG-
+      start: 1
+      end: 25
+
+  - id: AufnG
+    name: Gesetz über die Aufnahme und Unterbringung der Leistungsberechtigten nach dem Asylbewerberleistungsgesetz
+    numbering:
+      type: article
+      prefix: BayAsylAufnG-
+      start: 1
+      end: 25
+
+  - id: Ausführungsgesetz Art. 10-Gesetz – AGG 10
+    name: Gesetz über die Aufgaben der G10-Kommission im Bayerischen Landtag und zur Ausführung des Art. 10-Gesetzes – G 10
+    numbering:
+      type: article
+      prefix: BayAGG_10-
+      start: 1
+      end: 25
+
   - id: BayVwVfG
     name: Bayerisches Verwaltungsverfahrensgesetz
     numbering:
       type: article
       prefix: BayVwVfG-
       start: 1
-      end: 100
+      end: 110
 
   - id: "BayBO"
     name: "Bayerische Bauordnung"
@@ -19,7 +51,7 @@ laws:
         type: "article"
         prefix: "BayBO-"
         start: 1
-        end: 81 
+        end: 90 
 
   - id: "BayGO"
     name: "Gemeindeordnung für den Freistaat Bayern"
@@ -27,7 +59,7 @@ laws:
       type: "article"
       prefix: "BayGO-"
       start: 1
-      end: 122
+      end: 130
 
   - id: "BayVwZVG"
     name: "Bayerisches Verwaltungszustellungs- und Vollstreckungsgesetz"
@@ -35,7 +67,7 @@ laws:
       type: "article"
       prefix: "BayVwZVG-"
       start: 1
-      end: 45
+      end: 50
 
   - id: "JAPO"
     name: "Ausbildungs- und Prüfungsordnung für Juristen"
@@ -43,7 +75,7 @@ laws:
       type: "article"
       prefix: "BayJAPO-"
       start: 1
-      end: 73
+      end: 80
       
   - id: "LKrO"
     name: "Landkreisordnung für den Freistaat Bayern"
@@ -51,7 +83,7 @@ laws:
       type: "article"
       prefix: "BayLKrO-"
       start: 1
-      end: 108
+      end: 115
 
   - id: "GLKrWG"
     name: "Gesetz über die Wahl der Gemeinderäte, der Bürgermeister, der Kreistage und der Landräte"
@@ -59,7 +91,7 @@ laws:
       type: "article"
       prefix: "BayGLKrWG-"
       start: 1
-      end: 61
+      end: 70
 
   - id: "GLKrWO"
     name: "Wahlordnung für die Gemeinde- und die Landkreiswahlen"
@@ -67,7 +99,7 @@ laws:
       type: "article"
       prefix: "BayGLKrWO-"
       start: 1
-      end: 103
+      end: 110
 
   - id: "LStVG"
     name: "Gesetz über das Landesstrafrecht und das Verordnungsrecht auf dem Gebiet der öffentlichen Sicherheit und Ordnung"
@@ -75,7 +107,7 @@ laws:
       type: "article"
       prefix: "BayLStVG-"
       start: 1
-      end: 62
+      end: 70
 
   - id: "LWG"
     name: "Gesetz über Landtagswahl, Volksbegehren und Volksentscheid"
@@ -83,7 +115,7 @@ laws:
       type: "article"
       prefix: "BayLWG-"
       start: 1
-      end: 93
+      end: 100
 
   - id: "FTG"
     name: "Gesetz über den Schutz der Sonn- und Feiertage"
@@ -91,7 +123,7 @@ laws:
       type: "article"
       prefix: "BayFTG-"
       start: 1
-      end: 9
+      end: 15
 
   - id: "KG"
     name: "Kostengesetz"
@@ -99,7 +131,7 @@ laws:
       type: "article"
       prefix: "BayKG-"
       start: 1
-      end: 28
+      end: 35
 
   - id: "KAG"
     name: "Kommunalabgabengesetz"
@@ -107,7 +139,7 @@ laws:
       type: "article"
       prefix: "BayKAG-"
       start: 1
-      end: 21
+      end: 25
       
   - id: "BV"
     name: "Verfassung des Freistaates Bayern in der Fassung der Bekanntmachung vom 15. Dezember 1998"
@@ -115,7 +147,7 @@ laws:
       type: "article"
       prefix: "BayVerf-"
       start: 1
-      end: 188
+      end: 190
 
   - id: "VGemO"
     name: "Verwaltungsgemeinschaftsordnung für den Freistaat Bayern"
@@ -123,7 +155,7 @@ laws:
       type: "article"
       prefix: "BayVGemO-"
       start: 1
-      end: 12
+      end: 15
 
   - id: "VermKatG"
     name: "Gesetz über die Landesvermessung und das Liegenschaftskataster"
@@ -131,7 +163,7 @@ laws:
       type: "article"
       prefix: "BayVermKatG-"
       start: 1
-      end: 16
+      end: 20
 
   - id: "KommZG"
     name: "Gesetz über die kommunale Zusammenarbeit"
@@ -139,7 +171,7 @@ laws:
       type: "article"
       prefix: "BayKommZG-"
       start: 1
-      end: 55
+      end: 60
 
   - id: "BayVerfGHG"
     name: "Gesetz über den Bayerischen Verfassungsgerichtshof"
@@ -147,7 +179,7 @@ laws:
       type: "article"
       prefix: "BayVfGHG-"
       start: 1
-      end: 57
+      end: 60
 
   - id: "BayVersG"
     name: "Bayerisches Versammlungsgesetz"
@@ -155,7 +187,7 @@ laws:
       type: "article"
       prefix: "BayVersG08-"
       start: 1
-      end: 28
+      end: 30
 
   - id: "GerOrgG"
     name: "Gesetz über die Organisation der ordentlichen Gerichte im Freistaat Bayern"
@@ -163,7 +195,7 @@ laws:
       type: "article"
       prefix: "BayGerOrgG-"
       start: 1
-      end: 6
+      end: 10
 
   - id: "BayGSG"
     name: "Gesetz zum Schutz der Gesundheit-"
