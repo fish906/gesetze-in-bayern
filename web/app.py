@@ -18,7 +18,7 @@ logging.basicConfig(
 
 app = FastAPI(title="BayRecht")
 
-BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
+BASE_URL = os.environ.get("BASE_URL", "https://www.bayrecht.de")
 
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
@@ -303,6 +303,7 @@ async def sitemap():
         )
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<?xml-stylesheet type="text/xsl" href="/static/sitemap.xsl"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "\n".join(urls)
     xml += "\n</urlset>"
