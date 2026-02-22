@@ -19,9 +19,11 @@ logging.basicConfig(
     format="[%(levelname)s] %(asctime)s | %(name)s | %(message)s"
 )
 
-app = FastAPI(title="BayRecht")
-
+# General settings
+API_VERSION = os.environ.get("API_VERSION", "1.0")
+app = FastAPI(title="BayRecht", version=API_VERSION, docs_url="/docs", redoc_url= None)
 BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
+
 
 _start_time = _time.time()
 
@@ -110,16 +112,9 @@ def get_connection():
 @app.get("/favicon.ico")
 async def favicon():
     """Serve favicon for non-HTML pages."""
-
-    cache_key = "favicon"
-    cached = cache_get(cache_key)
-    if cached:
-        logger.info("Serving favicon from cache")
-        return FileResponse(cached, media_type="image/x-icon")
     
     path = os.path.join(_dir, "static", "favicon.ico")
     if os.path.exists(path):
-        cache_set(cache_key, path)
         return FileResponse(path, media_type="image/x-icon")
     return Response(status_code=204)
 
@@ -165,7 +160,7 @@ async def health_check():
     status_code = 200 if status == "ok" else 503
 
     result = {
-        "api_version": "1.0",
+        "api_version": API_VERSION,
         "status": status,
         "database": {
             "status": db_status,
@@ -188,7 +183,6 @@ async def law_index(request: Request):
     cache_key = "law_index"
     cached = cache_get(cache_key)
     if cached:
-        logger.info("Serving law index from cache")
         return HTMLResponse(cached)
 
     conn = get_connection()
@@ -246,7 +240,8 @@ async def law_toc(request: Request, law_name: str):
         "law": law,
         "norms": norms,
     })  
-
+    cache_set(cache_key, response.body.decode("utf-8"))
+    
     return response
 
 
@@ -522,3 +517,13 @@ async def search(request: Request, q: str = ""):
         html_parts.append('</div>')
 
     return HTMLResponse("\n".join(html_parts))
+
+@app.get("/impressum", response_class=HTMLResponse)
+async def impressum(request: Request):
+    """Serve impressum page."""
+    return templates.TemplateResponse("impressum.html", {"request": request})
+
+@app.get("/datenschutz", response_class=HTMLResponse)
+async def datenschutz(request: Request):
+    """Serve privacy policy page."""
+    return templates.TemplateResponse("privacy.html", {"request": request})
