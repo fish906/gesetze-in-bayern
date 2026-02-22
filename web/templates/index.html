@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}BayRecht — Bayerische Gesetze{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <h1>Gesetze</h1>
+    <p class="subtitle">Bayerische Landesgesetze und Verordnungen</p>
+</div>
+
+{% if laws %}
+<ul class="law-list">
+    {% for law in laws %}
+    <li class="law-item">
+        <a href="/gesetz/{{ law.name }}">
+            <span class="law-abbr">{{ law.name }}</span>
+            <span class="law-name">{{ law.description }}</span>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+    <p>Noch keine Gesetze vorhanden.</p>
+</div>
+{% endif %}
+{% endblock %}

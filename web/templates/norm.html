@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Art. {{ norm.number }} {{ norm.title }} — {{ law.name }} — BayRecht{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/">Gesetze</a>
+    <span class="sep">/</span>
+    <a href="/gesetz/{{ law.name }}">{{ law.name }}</a>
+    <span class="sep">/</span>
+    Art. {{ norm.number }}
+</nav>
+
+<div class="norm-page">
+    <div class="norm-main">
+        <nav class="norm-nav">
+            {% if prev_norm %}
+            <a href="/gesetz/{{ law.name }}/{{ prev_norm.number }}" class="norm-nav-link prev">
+                <span class="norm-nav-direction">← Zurück</span>
+                <span class="norm-nav-label">Art. {{ prev_norm.number }}{% if prev_norm.title %} – {{ prev_norm.title }}{% endif %}</span>
+            </a>
+            {% else %}
+            <span></span>
+            {% endif %}
+            {% if next_norm %}
+            <a href="/gesetz/{{ law.name }}/{{ next_norm.number }}" class="norm-nav-link next">
+                <span class="norm-nav-direction">Weiter →</span>
+                <span class="norm-nav-label">Art. {{ next_norm.number }}{% if next_norm.title %} – {{ next_norm.title }}{% endif %}</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <article class="norm-detail">
+            <header class="norm-header">
+                <span class="norm-label">Art. {{ norm.number }}</span>
+                {% if norm.title %}
+                <h1>{{ norm.title }}</h1>
+                {% endif %}
+            </header>
+
+            <div class="norm-content">
+                {{ norm.content | safe }}
+            </div>
+
+            {% if norm.url %}
+            <div class="norm-source">
+                <a href="{{ norm.url }}" target="_blank" rel="noopener">Quelle: gesetze-bayern.de ↗</a>
+            </div>
+            {% endif %}
+        </article>
+
+        <nav class="norm-nav">
+            {% if prev_norm %}
+            <a href="/gesetz/{{ law.name }}/{{ prev_norm.number }}" class="norm-nav-link prev">
+                <span class="norm-nav-direction">← Zurück</span>
+            </a>
+            {% else %}
+            <span></span>
+            {% endif %}
+            {% if next_norm %}
+            <a href="/gesetz/{{ law.name }}/{{ next_norm.number }}" class="norm-nav-link next">
+                <span class="norm-nav-direction">Weiter →</span>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <aside class="norm-sidebar">
+        <div class="sidebar-card">
+            <div class="sidebar-heading">Umgebung</div>
+            <ul class="sidebar-list">
+                {% for n in prev_norms %}
+                <li>
+                    <a href="/gesetz/{{ law.name }}/{{ n.number }}">
+                        <span class="sidebar-num">Art. {{ n.number }}</span>
+                        {% if n.title %} {{ n.title }}{% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+
+                <li class="current">
+                    <a href="/gesetz/{{ law.name }}/{{ norm.number }}">
+                        <span class="sidebar-num">Art. {{ norm.number }}</span>
+                        {% if norm.title %} {{ norm.title }}{% endif %}
+                    </a>
+                </li>
+
+                {% for n in next_norms %}
+                <li>
+                    <a href="/gesetz/{{ law.name }}/{{ n.number }}">
+                        <span class="sidebar-num">Art. {{ n.number }}</span>
+                        {% if n.title %} {{ n.title }}{% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <hr class="sidebar-divider">
+            <a href="/gesetz/{{ law.name }}" class="sidebar-toc-link">Gesamtes Inhaltsverzeichnis →</a>
+        </div>
+    </aside>
+</div>
+{% endblock %}

@@ -96,7 +96,7 @@ def main():
     try:
         config = load_config()
         base_url = config['base_url']
-        retries = config.get('global', {}).get('retries', 3)
+        retries = config.get('global', {}).get('retrie4', 3)
         delay = config.get('global', {}).get('delay_between_requests', 0.3)
 
         conn = init_db()

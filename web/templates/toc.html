@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ law.name }} — BayRecht{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/">Gesetze</a>
+    <span class="sep">/</span>
+    {{ law.name }}
+</nav>
+
+<div class="page-heading">
+    <h1>{{ law.name }}</h1>
+    <p class="subtitle">{{ law.description }}</p>
+</div>
+
+{% if norms %}
+<ul class="norm-list">
+    {% for norm in norms %}
+    <li class="norm-item">
+        <a href="/gesetz/{{ law.name }}/{{ norm.number }}">
+            <span class="norm-number">Art. {{ norm.number }}</span>
+            {% if norm.title %}
+            <span class="norm-title">{{ norm.title }}</span>
+            {% else %}
+            <span class="norm-title empty">(ohne Titel)</span>
+            {% endif %}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+    <p>Keine Normen für dieses Gesetz vorhanden.</p>
+</div>
+{% endif %}
+{% endblock %}
