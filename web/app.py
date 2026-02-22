@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
@@ -8,6 +8,7 @@ import pymysql
 import os
 import yaml
 import logging
+from urllib.parse import quote
 
 logger = logging.getLogger("web")
 logging.basicConfig(
@@ -17,11 +18,14 @@ logging.basicConfig(
 
 app = FastAPI(title="BayRecht")
 
+BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
+
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
 _root = os.path.dirname(_dir)
 
 templates = Jinja2Templates(directory=os.path.join(_dir, "templates"))
+templates.env.globals["base_url"] = BASE_URL
 app.mount("/static", StaticFiles(directory=os.path.join(_dir, "static")), name="static")
 
 
@@ -253,3 +257,65 @@ async def norm_detail(request: Request, law_name: str, norm_number: str):
         "prev_norms": prev_norms,
         "next_norms": next_norms,
     })
+
+
+@app.get("/sitemap.xml")
+async def sitemap():
+    """Generate sitemap.xml from database content."""
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT name FROM laws ORDER BY name")
+            laws = cursor.fetchall()
+
+            cursor.execute(
+                """SELECT l.name AS law_name, n.number
+                   FROM norms n
+                   JOIN laws l ON l.id = n.law_id
+                   WHERE n.is_stale = 0 OR n.is_stale IS NULL
+                   ORDER BY l.name, CAST(n.number AS UNSIGNED), n.number"""
+            )
+            norms = cursor.fetchall()
+    finally:
+        conn.close()
+
+    urls = []
+
+    # Homepage
+    urls.append(f"<url><loc>{BASE_URL}/</loc><priority>1.0</priority></url>")
+
+    # Law TOC pages
+    for law in laws:
+        name = quote(law["name"], safe="")
+        urls.append(
+            f"<url><loc>{BASE_URL}/gesetz/{name}</loc><priority>0.8</priority></url>"
+        )
+        urls.append(
+            f"<url><loc>{BASE_URL}/gesetz/{name}/gesamt</loc><priority>0.5</priority></url>"
+        )
+
+    # Individual norm pages
+    for norm in norms:
+        name = quote(norm["law_name"], safe="")
+        number = quote(str(norm["number"]), safe="")
+        urls.append(
+            f"<url><loc>{BASE_URL}/gesetz/{name}/{number}</loc><priority>0.6</priority></url>"
+        )
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += "\n".join(urls)
+    xml += "\n</urlset>"
+
+    return Response(content=xml, media_type="application/xml")
+
+
+@app.get("/robots.txt")
+async def robots():
+    """Serve robots.txt."""
+    content = f"""User-agent: *
+Allow: /
+
+Sitemap: {BASE_URL}/sitemap.xml
+"""
+    return PlainTextResponse(content)

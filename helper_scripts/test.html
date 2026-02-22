@@ -1,3 +1,5 @@
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -452,7 +454,7 @@
             max-width: var(--max-width-wide);
             margin: 0 auto;
             display: grid;
-            grid-template-columns: minmax(700px, 860px) 260px;
+            grid-template-columns: minmax(0, 860px) 260px;
             gap: 1.5rem;
             align-items: start;
         }
@@ -652,6 +654,18 @@
             padding: 1.5rem 2rem;
             font-size: 0.78rem;
             color: var(--color-text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            color: var(--color-accent);
         }
 
         /* ── Responsive ── */

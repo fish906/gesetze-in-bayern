@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}{{ law.name }} — Gesamtansicht — BayRecht{% endblock %}
+{% block meta_description %}{{ law.description }} ({{ law.name }}) — vollständiger Gesetzestext aller Artikel.{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ base_url }}/gesetz/{{ law.name }}/gesamt">{% endblock %}
+{% block og_title %}{{ law.name }} — Gesamtansicht{% endblock %}
+{% block og_description %}{{ law.description }} — vollständiger Gesetzestext{% endblock %}
 
 {% block content %}
 <nav class="breadcrumb">
@@ -14,7 +18,7 @@
 <div class="page-heading">
     <h1>{{ law.name }}</h1>
     <p class="subtitle">{{ law.description }} — Gesamtansicht ({{ norms | length }} Artikel)</p>
-    <button onclick="window.print()" class="print-button">Drucken</button>
+    <button onclick="window.print()" class="print-button">🖨 Drucken</button>
 </div>
 
 {% if norms %}

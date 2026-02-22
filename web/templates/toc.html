@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block title %}{{ law.name }} — BayRecht{% endblock %}
+{% block meta_description %}Inhaltsverzeichnis {{ law.description }} ({{ law.name }}) — alle Artikel im Überblick.{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ base_url }}/gesetz/{{ law.name }}">{% endblock %}
+{% block og_title %}{{ law.name }} — BayRecht{% endblock %}
+{% block og_description %}{{ law.description }} — Inhaltsverzeichnis{% endblock %}
 
 {% block content %}
 <nav class="breadcrumb">
