@@ -142,6 +142,188 @@
             color: var(--color-accent);
         }
 
+        /* ── Search ── */
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.4rem;
+            color: var(--color-text-secondary);
+            background: none;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .search-toggle:hover {
+            background: var(--color-highlight);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .search-bar {
+            display: none;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface);
+            position: relative;
+        }
+
+        .search-bar.open {
+            display: block;
+        }
+
+        .search-bar-inner {
+            max-width: var(--max-width-wide);
+            margin: 0 auto;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.5rem 0.9rem;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            color: var(--color-text);
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+
+        .search-input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(139, 37, 0, 0.08);
+        }
+
+        .search-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            background: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+
+        .search-close:hover {
+            color: var(--color-accent);
+            background: var(--color-highlight);
+        }
+
+        .search-results {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 2rem;
+            right: 2rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 200;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-results:not(:empty) {
+            display: block;
+        }
+
+        .search-group {
+            padding: 0.3rem 0;
+        }
+
+        .search-group + .search-group {
+            border-top: 1px solid var(--color-border-light);
+        }
+
+        .search-group-label {
+            display: block;
+            padding: 0.5rem 1rem 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-text-secondary);
+        }
+
+        .search-result {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: var(--color-text);
+            transition: background 0.12s ease;
+        }
+
+        .search-result:hover {
+            background: var(--color-highlight);
+        }
+
+        .search-result-abbr {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .search-result-text {
+            font-family: var(--font-serif);
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+
+        .search-empty {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+        }
+
+        .search-spinner {
+            position: absolute;
+            right: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        .htmx-request .search-spinner {
+            display: inline-block !important;
+        }
+
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
         /* ── Main ── */
         main {
             max-width: var(--max-width);
@@ -683,12 +865,25 @@
                 order: 0;
             }
 
+            .header-actions {
+                order: 0;
+            }
+
             .menu-toggle span {
                 display: none;
             }
 
             .menu-toggle {
                 padding: 0.4rem;
+            }
+
+            .search-bar-inner {
+                padding: 0.8rem 1rem;
+            }
+
+            .search-results {
+                left: 1rem;
+                right: 1rem;
             }
 
             .menu-dropdown {
@@ -750,7 +945,7 @@
         @media print {
             header, footer, .breadcrumb, .norm-nav,
             .norm-sidebar, .print-button, .full-view-link,
-            .header-menu {
+            .header-menu, .search-toggle, .search-bar {
                 display: none !important;
             }
 
@@ -798,7 +993,14 @@
         <div class="header-inner">
             <a href="/" class="site-title">Bay<span>Recht</span></a>
             <span class="site-subtitle">Bayerische Gesetze</span>
-            <div class="header-menu">
+            <div class="header-actions">
+                <button class="search-toggle" onclick="toggleSearch()" aria-label="Suche">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <circle cx="7.5" cy="7.5" r="5.5"/>
+                        <line x1="11.5" y1="11.5" x2="16" y2="16"/>
+                    </svg>
+                </button>
+                <div class="header-menu">
                 <button class="menu-toggle" onclick="document.querySelector('.menu-dropdown').classList.toggle('open')" aria-label="Menü">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                         <line x1="3" y1="5" x2="17" y2="5"/>
@@ -811,8 +1013,30 @@
                     <a href="/">Gesetze</a>
                 </nav>
             </div>
+            </div>
         </div>
     </header>
+
+    <div class="search-bar" id="search-bar">
+        <div class="search-bar-inner">
+            <input
+                type="text"
+                class="search-input"
+                id="search-input"
+                name="q"
+                placeholder="Gesetz oder Artikel suchen…"
+                autocomplete="off"
+                hx-get="/suche"
+                hx-trigger="keyup changed delay:250ms"
+                hx-target="#search-results"
+                hx-params="q"
+                hx-indicator=".search-spinner"
+            >
+            <span class="search-spinner"></span>
+            <button class="search-close" onclick="toggleSearch()" aria-label="Suche schließen">✕</button>
+        </div>
+        <div id="search-results" class="search-results"></div>
+    </div>
 
     <main>
         {% block content %}{% endblock %}
@@ -825,11 +1049,40 @@
         </div>
     </footer>
     <script>
+        function toggleSearch() {
+            const bar = document.getElementById('search-bar');
+            const input = document.getElementById('search-input');
+            const results = document.getElementById('search-results');
+            bar.classList.toggle('open');
+            if (bar.classList.contains('open')) {
+                input.focus();
+            } else {
+                input.value = '';
+                results.innerHTML = '';
+            }
+        }
+
         document.addEventListener('click', function(e) {
             const menu = document.querySelector('.menu-dropdown');
             const toggle = document.querySelector('.menu-toggle');
             if (menu && !menu.contains(e.target) && !toggle.contains(e.target)) {
                 menu.classList.remove('open');
+            }
+
+            const searchBar = document.getElementById('search-bar');
+            const searchToggle = document.querySelector('.search-toggle');
+            if (searchBar && searchBar.classList.contains('open')
+                && !searchBar.contains(e.target) && !searchToggle.contains(e.target)) {
+                toggleSearch();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const searchBar = document.getElementById('search-bar');
+                if (searchBar && searchBar.classList.contains('open')) {
+                    toggleSearch();
+                }
             }
         });
     </script>

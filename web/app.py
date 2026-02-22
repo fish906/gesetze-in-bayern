@@ -18,7 +18,7 @@ logging.basicConfig(
 
 app = FastAPI(title="BayRecht")
 
-BASE_URL = os.environ.get("BASE_URL", "https://www.bayrecht.de")
+BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
 
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
@@ -320,3 +320,70 @@ Allow: /
 Sitemap: {BASE_URL}/sitemap.xml
 """
     return PlainTextResponse(content)
+
+
+@app.get("/suche", response_class=HTMLResponse)
+async def search(request: Request, q: str = ""):
+    """Live search endpoint returning HTML results for HTMX."""
+    q = q.strip()
+    if len(q) < 2:
+        return HTMLResponse("")
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Search laws by name or description
+            cursor.execute(
+                """SELECT name, description FROM laws
+                   WHERE name LIKE %s OR description LIKE %s
+                   ORDER BY name
+                   LIMIT 5""",
+                (f"%{q}%", f"%{q}%")
+            )
+            laws = cursor.fetchall()
+
+            # Search norms by number (match beginning)
+            cursor.execute(
+                """SELECT l.name AS law_name, l.description AS law_description,
+                          n.number, n.title
+                   FROM norms n
+                   JOIN laws l ON l.id = n.law_id
+                   WHERE (n.is_stale = 0 OR n.is_stale IS NULL)
+                     AND (n.number LIKE %s OR n.number_raw LIKE %s)
+                   ORDER BY l.name, CAST(n.number AS UNSIGNED), n.number
+                   LIMIT 10""",
+                (f"{q}%", f"%{q}%")
+            )
+            norms = cursor.fetchall()
+    finally:
+        conn.close()
+
+    if not laws and not norms:
+        return HTMLResponse('<div class="search-empty">Keine Ergebnisse</div>')
+
+    html_parts = []
+
+    if laws:
+        html_parts.append('<div class="search-group"><span class="search-group-label">Gesetze</span>')
+        for law in laws:
+            html_parts.append(
+                f'<a href="/gesetz/{law["name"]}/gesamt" class="search-result">'
+                f'<span class="search-result-abbr">{law["name"]}</span>'
+                f'<span class="search-result-text">{law["description"]}</span>'
+                f'</a>'
+            )
+        html_parts.append('</div>')
+
+    if norms:
+        html_parts.append('<div class="search-group"><span class="search-group-label">Normen</span>')
+        for norm in norms:
+            title = norm["title"] or "(ohne Titel)"
+            html_parts.append(
+                f'<a href="/gesetz/{norm["law_name"]}/{norm["number"]}" class="search-result">'
+                f'<span class="search-result-abbr">{norm["law_name"]} Art. {norm["number"]}</span>'
+                f'<span class="search-result-text">{title}</span>'
+                f'</a>'
+            )
+        html_parts.append('</div>')
+
+    return HTMLResponse("\n".join(html_parts))
