@@ -74,6 +74,68 @@
             text-transform: uppercase;
         }
 
+        /* ── Menu ── */
+        .header-menu {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .menu-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            background: none;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .menu-toggle:hover {
+            background: var(--color-highlight);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            min-width: 200px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .menu-dropdown.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-dropdown a {
+            display: block;
+            padding: 0.7rem 1rem;
+            font-family: var(--font-sans);
+            font-size: 0.88rem;
+            color: var(--color-text);
+            text-decoration: none;
+            transition: background 0.15s ease;
+        }
+
+        .menu-dropdown a:hover {
+            background: var(--color-highlight);
+            color: var(--color-accent);
+        }
+
         /* ── Main ── */
         main {
             max-width: var(--max-width);
@@ -590,8 +652,29 @@
         @media (max-width: 640px) {
             .header-inner {
                 padding: 1.2rem 1rem;
-                flex-direction: column;
+                flex-wrap: wrap;
                 gap: 0.2rem;
+            }
+
+            .site-subtitle {
+                flex-basis: 100%;
+                order: 1;
+            }
+
+            .header-menu {
+                order: 0;
+            }
+
+            .menu-toggle span {
+                display: none;
+            }
+
+            .menu-toggle {
+                padding: 0.4rem;
+            }
+
+            .menu-dropdown {
+                right: 0;
             }
 
             main {
@@ -648,7 +731,8 @@
         /* ── Print ── */
         @media print {
             header, footer, .breadcrumb, .norm-nav,
-            .norm-sidebar, .print-button, .full-view-link {
+            .norm-sidebar, .print-button, .full-view-link,
+            .header-menu {
                 display: none !important;
             }
 
@@ -696,6 +780,19 @@
         <div class="header-inner">
             <a href="/" class="site-title">Bay<span>Recht</span></a>
             <span class="site-subtitle">Bayerische Gesetze</span>
+            <div class="header-menu">
+                <button class="menu-toggle" onclick="document.querySelector('.menu-dropdown').classList.toggle('open')" aria-label="Menü">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                        <line x1="3" y1="5" x2="17" y2="5"/>
+                        <line x1="3" y1="10" x2="17" y2="10"/>
+                        <line x1="3" y1="15" x2="17" y2="15"/>
+                    </svg>
+                    <span>Menü</span>
+                </button>
+                <nav class="menu-dropdown">
+                    <a href="/">Gesetze</a>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -708,5 +805,14 @@
             Bayerische Gesetze &mdash; Keine amtliche Veröffentlichung
         </div>
     </footer>
+    <script>
+        document.addEventListener('click', function(e) {
+            const menu = document.querySelector('.menu-dropdown');
+            const toggle = document.querySelector('.menu-toggle');
+            if (menu && !menu.contains(e.target) && !toggle.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    </script>
 </body>
 </html>
