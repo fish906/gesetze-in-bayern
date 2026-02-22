@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, PlainTextResponse, Response
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
@@ -9,6 +9,9 @@ import os
 import yaml
 import logging
 from urllib.parse import quote
+import time as _time
+import psutil
+import json as _json
 
 logger = logging.getLogger("web")
 logging.basicConfig(
@@ -19,6 +22,8 @@ logging.basicConfig(
 app = FastAPI(title="BayRecht")
 
 BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
+
+_start_time = _time.time()
 
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
@@ -85,6 +90,71 @@ def get_connection():
         database=db_conf["db"],
         charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor,
+    )
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Serve favicon for non-HTML pages."""
+    path = os.path.join(_dir, "static", "favicon.ico")
+    if os.path.exists(path):
+        return FileResponse(path, media_type="image/x-icon")
+    return Response(status_code=204)
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    # Server metrics
+    uptime_seconds = round(_time.time() - _start_time)
+    cpu_percent = psutil.cpu_percent(interval=0.1)
+    memory = psutil.virtual_memory()
+    disk = psutil.disk_usage("/")
+
+    server = {
+        "uptime_seconds": uptime_seconds,
+        "cpu_percent": cpu_percent,
+        "memory": {
+            "total_mb": round(memory.total / 1024 / 1024),
+            "used_mb": round(memory.used / 1024 / 1024),
+            "percent": memory.percent,
+        },
+        "disk": {
+            "total_gb": round(disk.total / 1024 / 1024 / 1024, 1),
+            "used_gb": round(disk.used / 1024 / 1024 / 1024, 1),
+            "percent": disk.percent,
+        },
+    }
+
+    # Database check
+    db_status = "connected"
+    db_response_ms = None
+    try:
+        t0 = _time.time()
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        conn.close()
+        db_response_ms = round((_time.time() - t0) * 1000, 1)
+    except Exception as e:
+        logger.error(f"Health check DB failed: {e}")
+        db_status = "unreachable"
+
+    status = "ok" if db_status == "connected" else "degraded"
+    status_code = 200 if status == "ok" else 503
+
+    result = {
+        "api_version": "1.0",
+        "status": status,
+        "database": {
+            "status": db_status,
+            "response_ms": db_response_ms,
+        },
+        "server": server,
+    }
+
+    return Response(
+        content=_json.dumps(result, indent=2),
+        status_code=status_code,
+        media_type="application/json",
     )
 
 

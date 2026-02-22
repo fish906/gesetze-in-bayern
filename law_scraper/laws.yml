@@ -37,6 +37,39 @@ laws:
       start: 1
       end: 25
 
+  - id: BayHZG
+    name: Gesetz über die Hochschulzulassung in Bayern
+    numbering:
+      type: article
+      prefix: BayHZG-
+      start: 1
+      end: 15
+
+
+  - id: BayGIG
+    name: Bayrisches Gesetz zur Gleichstellung von Frauen und Männern
+    numbering:
+      type: article
+      prefix: BayGIG-
+      start: 1
+      end: 25
+
+  - id: BayGIG
+    name: Bayrisches Gesetz zur Gleichstellung von Frauen und Männern
+    numbering:
+      type: article
+      prefix: BayGIG-
+      start: 1
+      end: 25
+
+  - id: BayESG
+    name: Gesetz über die Rechtsverhältnisse der nichtbundeseigenen Eisenbahnen und der Seilbahnen in Bayern
+    numbering:
+      type: article
+      prefix: BayESG-
+      start: 1
+      end: 35
+
   - id: BayVwVfG
     name: Bayerisches Verwaltungsverfahrensgesetz
     numbering:
