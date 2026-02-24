@@ -24,6 +24,7 @@ logging.basicConfig(
 API_VERSION = os.environ.get("API_VERSION", "1.0")
 app = FastAPI(title="BayRecht", version=API_VERSION, docs_url="/docs", redoc_url= None)
 BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.netzsys.de")
+dotenv.load_dotenv()
 
 
 _start_time = _time.time()
