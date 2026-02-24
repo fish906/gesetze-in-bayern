@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import pymysql
+import dotenv
 import os
 import yaml
 import logging
@@ -22,7 +23,7 @@ logging.basicConfig(
 # General settings
 API_VERSION = os.environ.get("API_VERSION", "1.0")
 app = FastAPI(title="BayRecht", version=API_VERSION, docs_url="/docs", redoc_url= None)
-BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.example.de")
+BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.netzsys.de")
 
 
 _start_time = _time.time()
@@ -90,18 +91,26 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 def load_db_config():
-    path = os.path.join(_root, "config.yml")
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Config not found: {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-    return config["database"]
+    required_vars = ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"]
 
+    missing = [var for var in required_vars if not os.environ.get(var)]
+    if missing:
+        raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
+
+    return {
+        "host": os.environ["DB_HOST"],
+        "user": os.environ["DB_USER"],
+        "password": os.environ["DB_PASSWORD"],
+        "db": os.environ["DB_NAME"],
+        "port": int(os.environ.get("DB_PORT", 3306)),
+    }
 
 def get_connection():
     db_conf = load_db_config()
+    
     return pymysql.connect(
-        host=db_conf.get("host", "localhost"),
+        host=db_conf["host"],
+        port=db_conf["port"],
         user=db_conf["user"],
         password=db_conf["password"],
         database=db_conf["db"],
