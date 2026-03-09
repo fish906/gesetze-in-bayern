@@ -10,8 +10,8 @@
     <meta property="og:description" content="{% block og_description %}Bayerische Landesgesetze und Verordnungen{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="BayRecht">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <script src="/static/js/htmx.min.js"></script>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -74,8 +74,6 @@
             <div>
                 <a href="/docs" class="footer-link">API</a>
                 <a href="/sitemap.xml" class="footer-link">Sitemap</a>
-                <a href="/impressum" class="footer-link">Impressum</a>
-                <a href="/datenschutz" class="footer-link">Datenschutz</a>
             </div>
         </div>
     </footer>
@@ -113,6 +111,13 @@
                 const searchBar = document.getElementById('search-bar');
                 if (searchBar && searchBar.classList.contains('open')) {
                     toggleSearch();
+                }
+            }
+            if (e.key === 'Enter' && e.target.id === 'search-input') {
+                e.preventDefault();
+                const firstResult = document.querySelector('#search-results a.search-result');
+                if (firstResult) {
+                    window.location.href = firstResult.getAttribute('href');
                 }
             }
         });

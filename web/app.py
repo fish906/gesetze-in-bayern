@@ -524,13 +524,42 @@ Sitemap: {BASE_URL}/sitemap.xml
 @app.get("/suche", response_class=HTMLResponse)
 async def search(request: Request, q: str = ""):
     """Live search endpoint returning HTML results for HTMX."""
+    import re
     q = q.strip()
     if len(q) < 2:
         return HTMLResponse("")
 
+    # Try to parse combined queries like "5 BayBO", "Art. 5 BayBO", "BayBO 5", "BayBO Art. 5"
+    direct_match = None
+    combined = re.match(
+        r'^(?:Art\.?\s*)?(\d+\w*)\s+([A-Za-zÄÖÜäöüß][\w\-]*)$', q, re.IGNORECASE
+    ) or re.match(
+        r'^([A-Za-zÄÖÜäöüß][\w\-]*)\s+(?:Art\.?\s*)?(\d+\w*)$', q, re.IGNORECASE
+    )
+
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
+            if combined:
+                groups = combined.groups()
+                # Figure out which group is the number and which is the law
+                if re.match(r'^\d', groups[0]):
+                    norm_number, law_name = groups
+                else:
+                    law_name, norm_number = groups
+
+                cursor.execute(
+                    """SELECT l.name AS law_name, n.number, n.title
+                       FROM norms n
+                       JOIN laws l ON l.id = n.law_id
+                       WHERE (n.is_stale = 0 OR n.is_stale IS NULL)
+                         AND LOWER(l.name) = LOWER(%s)
+                         AND n.number = %s
+                       LIMIT 1""",
+                    (law_name, norm_number)
+                )
+                direct_match = cursor.fetchone()
+
             # Search laws by name or description, ordered by popularity
             cursor.execute(
                 """SELECT name, description FROM laws
@@ -557,10 +586,22 @@ async def search(request: Request, q: str = ""):
     finally:
         conn.close()
 
-    if not laws and not norms:
+    if not direct_match and not laws and not norms:
         return HTMLResponse('<div class="search-empty">Keine Ergebnisse</div>')
 
     html_parts = []
+
+    # Direct match goes first
+    if direct_match:
+        title = direct_match["title"] or "(ohne Titel)"
+        html_parts.append(
+            '<div class="search-group"><span class="search-group-label">Direktes Ergebnis</span>'
+            f'<a href="/gesetz/{direct_match["law_name"]}/{direct_match["number"]}" '
+            f'class="search-result search-result-direct">'
+            f'<span class="search-result-abbr">Art. {direct_match["number"]} {direct_match["law_name"]}</span>'
+            f'<span class="search-result-text">{title}</span>'
+            f'</a></div>'
+        )
 
     if laws:
         html_parts.append('<div class="search-group"><span class="search-group-label">Gesetze</span>')
@@ -579,7 +620,7 @@ async def search(request: Request, q: str = ""):
             title = norm["title"] or "(ohne Titel)"
             html_parts.append(
                 f'<a href="/gesetz/{norm["law_name"]}/{norm["number"]}" class="search-result">'
-                f'<span class="search-result-abbr">{norm["law_name"]} Art. {norm["number"]}</span>'
+                f'<span class="search-result-abbr">Art. {norm["number"]} {norm["law_name"]} </span>'
                 f'<span class="search-result-text">{title}</span>'
                 f'</a>'
             )
