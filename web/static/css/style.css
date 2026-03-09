@@ -678,7 +678,7 @@ main {
     max-width: var(--max-width-wide);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(700, 860px) 260px;
+    grid-template-columns: minmax(700px, 860px) 260px;
     gap: 1.5rem;
     align-items: start;
 }

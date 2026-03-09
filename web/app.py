@@ -620,7 +620,7 @@ async def search(request: Request, q: str = ""):
             title = norm["title"] or "(ohne Titel)"
             html_parts.append(
                 f'<a href="/gesetz/{norm["law_name"]}/{norm["number"]}" class="search-result">'
-                f'<span class="search-result-abbr">Art. {norm["number"]} {norm["law_name"]} </span>'
+                f'<span class="search-result-abbr">Art. {norm["number"]} {norm["law_name"]}</span>'
                 f'<span class="search-result-text">{title}</span>'
                 f'</a>'
             )

@@ -18,3 +18,5 @@ lib64/
 
 */__init__.py
 .env
+
+docker-compose.yml
