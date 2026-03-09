@@ -7,7 +7,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import pymysql
 import dotenv
 import os
-import yaml
 import logging
 from urllib.parse import quote
 import time as _time
@@ -23,9 +22,8 @@ logging.basicConfig(
 # General settings
 API_VERSION = os.environ.get("API_VERSION", "1.0")
 app = FastAPI(title="BayRecht", version=API_VERSION, docs_url="/docs", redoc_url= None)
-BASE_URL = os.environ.get("BASE_URL", "https://bayrecht.netzsys.de")
+BASE_URL = os.environ.get("BASE_URL", "https://recht.netzsys.de")
 dotenv.load_dotenv()
-
 
 _start_time = _time.time()
 
@@ -43,6 +41,63 @@ def cache_get(key):
 def cache_set(key, value):
     """Store a value in cache with current timestamp."""
     _cache[key] = {"value": value, "time": _time.time()}
+
+# Hit tracking (in-memory buffer, flushed to DB periodically)
+_hits = {}
+_hits_last_flush = _time.time()
+HITS_FLUSH_INTERVAL = int(os.environ.get("HITS_FLUSH_INTERVAL", 60))
+
+def record_hit(hit_type, identifier):
+    """Record a page view. hit_type is 'law' or 'norm'."""
+    key = f"{hit_type}:{identifier}"
+    _hits[key] = _hits.get(key, 0) + 1
+    logger.debug(f"Recorded hit: {key} (total in buffer: {_hits[key]})")
+    maybe_flush_hits()
+
+def flush_hits():
+    """Write accumulated hits to the database and reset the buffer."""
+    global _hits, _hits_last_flush
+    if not _hits:
+        return
+    hits_to_flush = _hits.copy()
+    _hits = {}
+    _hits_last_flush = _time.time()
+
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            for key, count in hits_to_flush.items():
+                hit_type, identifier = key.split(":", 1)
+                if hit_type == "law":
+                    cursor.execute(
+                        "UPDATE laws SET views = views + %s WHERE name = %s",
+                        (count, identifier)
+                    )
+                elif hit_type == "norm":
+                    law_name, number = identifier.split("/", 1)
+                    cursor.execute(
+                        """UPDATE norms SET views = views + %s
+                           WHERE law_id = (SELECT id FROM laws WHERE name = %s)
+                             AND number = %s""",
+                        (count, law_name, number)
+                    )
+        conn.commit()
+        conn.close()
+        logger.debug(f"Flushed {len(hits_to_flush)} hit counters to DB")
+    except Exception as e:
+        logger.info(f"Failed to flush hits: {e}")
+        for key, count in hits_to_flush.items():
+            _hits[key] = _hits.get(key, 0) + count
+
+def maybe_flush_hits():
+    """Flush hits if enough time has passed."""
+    if (_time.time() - _hits_last_flush) >= HITS_FLUSH_INTERVAL:
+        flush_hits()
+
+@app.on_event("shutdown")
+async def shutdown_flush():
+    """Flush remaining hits when the app shuts down."""
+    flush_hits()
 
 # Paths
 _dir = os.path.dirname(os.path.abspath(__file__))
@@ -216,6 +271,7 @@ async def law_index(request: Request):
 @app.get("/gesetz/{law_name}", response_class=HTMLResponse)
 async def law_toc(request: Request, law_name: str):
     """Display table of contents for a specific law."""
+    record_hit("law", law_name)
 
     cache_key = f"toc_{law_name}"
     cached = cache_get(cache_key)
@@ -258,6 +314,8 @@ async def law_toc(request: Request, law_name: str):
 @app.get("/gesetz/{law_name}/gesamt", response_class=HTMLResponse)
 async def law_full_view(request: Request, law_name: str):
     """Display all norms of a law on a single page."""
+    record_hit("law", law_name)
+
     cache_key = f"full_view_{law_name}"
     cached = cache_get(cache_key)
     if cached:
@@ -299,11 +357,12 @@ async def law_full_view(request: Request, law_name: str):
 @app.get("/gesetz/{law_name}/{norm_number}", response_class=HTMLResponse)
 async def norm_detail(request: Request, law_name: str, norm_number: str):
     """Display the full content of a single norm."""
+    record_hit("norm", f"{law_name}/{norm_number}")
 
     cache_key = f"norm_{law_name}_{norm_number}"
     cached = cache_get(cache_key)
     if cached:
-        logger.info(f"Serving norm {law_name} {norm_number} from cache")
+        #logger.info(f"Serving norm {law_name} {norm_number} from cache")
         return HTMLResponse(cached)
 
     conn = get_connection()
@@ -472,17 +531,17 @@ async def search(request: Request, q: str = ""):
     conn = get_connection()
     try:
         with conn.cursor() as cursor:
-            # Search laws by name or description
+            # Search laws by name or description, ordered by popularity
             cursor.execute(
                 """SELECT name, description FROM laws
                    WHERE name LIKE %s OR description LIKE %s
-                   ORDER BY name
+                   ORDER BY views DESC, name
                    LIMIT 5""",
                 (f"%{q}%", f"%{q}%")
             )
             laws = cursor.fetchall()
 
-            # Search norms by number (match beginning)
+            # Search norms by number, ordered by popularity
             cursor.execute(
                 """SELECT l.name AS law_name, l.description AS law_description,
                           n.number, n.title
@@ -490,7 +549,7 @@ async def search(request: Request, q: str = ""):
                    JOIN laws l ON l.id = n.law_id
                    WHERE (n.is_stale = 0 OR n.is_stale IS NULL)
                      AND (n.number LIKE %s OR n.number_raw LIKE %s)
-                   ORDER BY l.name, CAST(n.number AS UNSIGNED), n.number
+                   ORDER BY n.views DESC, l.name, CAST(n.number AS UNSIGNED), n.number
                    LIMIT 10""",
                 (f"{q}%", f"%{q}%")
             )
