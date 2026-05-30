@@ -10,7 +10,7 @@
     <meta property="og:description" content="{% block og_description %}Bayerische Landesgesetze und Verordnungen{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="BayRecht">
-    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <script src="/static/js/htmx.min.js"></script>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
@@ -37,6 +37,12 @@
                 </button>
                 <nav class="menu-dropdown">
                     <a href="/">Gesetze</a>
+                    {% if current_user.is_authenticated %}
+                    <a href="/profil">Profil</a>
+                    <a href="/logout">Abmelden</a>
+                    {% else %}
+                    <a href="/login">Anmelden</a>
+                    {% endif %}
                 </nav>
             </div>
             </div>
@@ -72,12 +78,31 @@
         <div class="footer-inner">
             Bayerische Gesetze &mdash; Keine amtliche Veröffentlichung
             <div>
-                <a href="/docs" class="footer-link">API</a>
+                <a href="/impressum" class="footer-link">Impressum</a>
+                <a href="/datenschutz" class="footer-link">Datenschutz</a>
                 <a href="/sitemap.xml" class="footer-link">Sitemap</a>
             </div>
         </div>
     </footer>
     <script>
+        let _searchFocusIdx = -1;
+
+        function _getSearchResults() {
+            return Array.from(document.querySelectorAll('#search-results a.search-result'));
+        }
+
+        function _setSearchFocus(idx) {
+            const results = _getSearchResults();
+            results.forEach(r => r.classList.remove('focused'));
+            if (idx >= 0 && idx < results.length) {
+                _searchFocusIdx = idx;
+                results[idx].classList.add('focused');
+                results[idx].scrollIntoView({ block: 'nearest' });
+            } else {
+                _searchFocusIdx = -1;
+            }
+        }
+
         function toggleSearch() {
             const bar = document.getElementById('search-bar');
             const input = document.getElementById('search-input');
@@ -88,6 +113,7 @@
             } else {
                 input.value = '';
                 results.innerHTML = '';
+                _searchFocusIdx = -1;
             }
         }
 
@@ -107,18 +133,30 @@
         });
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const searchBar = document.getElementById('search-bar');
-                if (searchBar && searchBar.classList.contains('open')) {
-                    toggleSearch();
-                }
+            const searchBar = document.getElementById('search-bar');
+            if (e.key === 'Escape' && searchBar && searchBar.classList.contains('open')) {
+                toggleSearch();
+                return;
             }
-            if (e.key === 'Enter' && e.target.id === 'search-input') {
+            if (e.target.id !== 'search-input') return;
+
+            const results = _getSearchResults();
+            if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                const firstResult = document.querySelector('#search-results a.search-result');
-                if (firstResult) {
-                    window.location.href = firstResult.getAttribute('href');
-                }
+                _setSearchFocus(Math.min(_searchFocusIdx + 1, results.length - 1));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                _setSearchFocus(Math.max(_searchFocusIdx - 1, 0));
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const target = _searchFocusIdx >= 0 ? results[_searchFocusIdx] : results[0];
+                if (target) window.location.href = target.getAttribute('href');
+            }
+        });
+
+        document.addEventListener('htmx:afterSwap', function(e) {
+            if (e.detail.target.id === 'search-results') {
+                _searchFocusIdx = -1;
             }
         });
     </script>

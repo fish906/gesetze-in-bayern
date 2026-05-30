@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Registrieren — BayRecht{% endblock %}
+{% block meta_description %}Konto erstellen bei BayRecht{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ base_url }}/registrierung">{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-card">
+        {% if success %}
+        <h1 class="login-title">E-Mail bestätigen</h1>
+        <p class="register-info">
+            Wir haben eine Bestätigungs-E-Mail an <strong>{{ email }}</strong> gesendet.
+            Bitte klicken Sie auf den Link in der E-Mail, um Ihr Konto zu aktivieren.
+        </p>
+        <a href="/login" class="login-btn" style="display:block;text-align:center;text-decoration:none;margin-top:1.5rem;">Zur Anmeldung</a>
+        {% else %}
+        <h1 class="login-title">Registrieren</h1>
+        <form method="post" action="/register" class="login-form" novalidate>
+            {% if error %}
+            <div class="login-error">{{ error }}</div>
+            {% endif %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">Vorname</label>
+                    <input type="text" id="first_name" name="first_name" required autofocus autocomplete="given-name"
+                           value="{{ request.form.get('first_name', '') }}">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Nachname</label>
+                    <input type="text" id="last_name" name="last_name" required autocomplete="family-name"
+                           value="{{ request.form.get('last_name', '') }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" id="email" name="email" required autocomplete="email"
+                       value="{{ request.form.get('email', '') }}">
+            </div>
+            <div class="form-group">
+                <label for="password">Passwort <span class="form-hint">(min. 8 Zeichen)</span></label>
+                <input type="password" id="password" name="password" required autocomplete="new-password" minlength="8">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Passwort bestätigen</label>
+                <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" minlength="8">
+            </div>
+            <button type="submit" class="login-btn">Konto erstellen</button>
+        </form>
+        <p class="register-login-link">Bereits registriert? <a href="/login">Anmelden</a></p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

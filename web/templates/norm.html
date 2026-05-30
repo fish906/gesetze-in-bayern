@@ -20,7 +20,7 @@
             {% if prev_norm %}
             <a href="/gesetz/{{ law.name }}/{{ prev_norm.number }}" class="norm-nav-link prev">
                 <span class="norm-nav-direction">← Zurück</span>
-                <span class="norm-nav-label">Art. {{ prev_norm.number }}{% if prev_norm.title %} {{ prev_norm.title }}{% endif %}</span>
+                <span class="norm-nav-label">Art. {{ prev_norm.number }}</span>
             </a>
             {% else %}
             <span></span>
@@ -28,7 +28,7 @@
             {% if next_norm %}
             <a href="/gesetz/{{ law.name }}/{{ next_norm.number }}" class="norm-nav-link next">
                 <span class="norm-nav-direction">Weiter →</span>
-                <span class="norm-nav-label">Art. {{ next_norm.number }}{% if next_norm.title %} {{ next_norm.title }}{% endif %}</span>
+                <span class="norm-nav-label">Art. {{ next_norm.number }}</span>
             </a>
             {% endif %}
         </nav>

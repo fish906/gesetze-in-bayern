@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Profil — BayRecht{% endblock %}
+{% block meta_description %}Mein Profil{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/">Gesetze</a>
+    <span class="sep">/</span>
+    Profil
+</nav>
+
+<div class="profile-page">
+    <h1 class="profile-title">Mein Profil</h1>
+
+    <div class="profile-card">
+        <dl class="profile-fields">
+            <div class="profile-field">
+                <dt>Name</dt>
+                <dd>{{ current_user.first_name }} {{ current_user.last_name }}</dd>
+            </div>
+            <div class="profile-field">
+                <dt>E-Mail</dt>
+                <dd>{{ current_user.email }}</dd>
+            </div>
+            <div class="profile-field">
+                <dt>Rolle</dt>
+                <dd class="profile-role profile-role--{{ current_user.role.value }}">{{ current_user.role.value }}</dd>
+            </div>
+            <div class="profile-field">
+                <dt>Benutzer-ID</dt>
+                <dd class="profile-uuid">{{ current_user.uuid }}</dd>
+            </div>
+            <div class="profile-field">
+                <dt>Mitglied seit</dt>
+                <dd>{{ current_user.created_at.strftime('%d.%m.%Y') }}</dd>
+            </div>
+        </dl>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    <details class="password-details" {% if messages %}open{% endif %}>
+        <summary class="password-toggle-btn">Passwort ändern</summary>
+        <div class="password-form-wrap">
+            {% for category, message in messages %}
+            <div class="profile-flash profile-flash--{{ category }}">{{ message }}</div>
+            {% endfor %}
+            <form method="post" action="/profil/passwort" class="password-form" novalidate>
+                <div class="form-group">
+                    <label for="current_password">Aktuelles Passwort</label>
+                    <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Neues Passwort</label>
+                    <input type="password" id="new_password" name="new_password" required autocomplete="new-password" minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Neues Passwort bestätigen</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" minlength="8">
+                </div>
+                <button type="submit" class="login-btn">Speichern</button>
+            </form>
+        </div>
+    </details>
+    {% endwith %}
+
+    <a href="/logout" class="profile-logout">Abmelden</a>
+</div>
+{% endblock %}

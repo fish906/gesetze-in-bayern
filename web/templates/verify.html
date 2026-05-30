@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}E-Mail bestätigen — BayRecht{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    {% if state == "expired" %}
+    <span class="error-code">⏱</span>
+    <h1>Link abgelaufen</h1>
+    <p>Der Bestätigungslink ist nicht mehr gültig (24-Stunden-Frist überschritten).<br>Bitte registrieren Sie sich erneut.</p>
+    <a href="/registrierung" class="error-home-link">Erneut registrieren →</a>
+    {% elif state == "already" %}
+    <span class="error-code">✓</span>
+    <h1>Bereits bestätigt</h1>
+    <p>Ihre E-Mail-Adresse wurde bereits verifiziert. Sie können sich anmelden.</p>
+    <a href="/login" class="error-home-link">Zur Anmeldung →</a>
+    {% else %}
+    <span class="error-code">✗</span>
+    <h1>Ungültiger Link</h1>
+    <p>Der Bestätigungslink ist ungültig.</p>
+    <a href="/registrierung" class="error-home-link">Erneut registrieren →</a>
+    {% endif %}
+</div>
+{% endblock %}

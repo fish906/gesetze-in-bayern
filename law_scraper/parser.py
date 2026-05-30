@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 import logging
+from datetime import date
 
 logger = logging.getLogger("law_scraper.parser")
 
@@ -15,18 +16,44 @@ def to_superscript(number_str):
 def extract_text_with_sup(elem):
     parts = []
     for child in elem.children:
-        if getattr(child, 'name', None) == 'sup' and 'satznr' in child.get('class', []):
+        tag = getattr(child, 'name', None)
+        if tag is None:
+            parts.append(str(child))
+        elif tag == 'sup':
             parts.append(f"<sup>{child.get_text(strip=True)}</sup>")
-        elif isinstance(child, str):
-            parts.append(child)
+        elif tag in ('em', 'i'):
+            parts.append(f"<em>{extract_text_with_sup(child)}</em>")
+        elif tag in ('strong', 'b'):
+            parts.append(f"<strong>{extract_text_with_sup(child)}</strong>")
+        elif tag == 'br':
+            parts.append('<br>')
+        elif tag == 'a':
+            parts.append(child.get_text())
         else:
             parts.append(child.get_text())
-            
     return ''.join(parts).strip()
 
 class ParseError(Exception):
     """Raised when a page does not contain the expected norm structure."""
     pass
+
+
+def process_dl(dl_elem):
+    """Recursively convert a <dl> structure to an HTML <ol>."""
+    items = []
+    for dt in dl_elem.find_all('dt', recursive=False):
+        dd = dt.find_next_sibling('dd')
+        if not dd:
+            continue
+        dd_div = dd.find('div', class_='paratext')
+        text = extract_text_with_sup(dd_div if dd_div else dd)
+        nested = dd.find('dl')
+        if nested:
+            text += process_dl(nested)
+        items.append(f"<li>{text}</li>")
+    if not items:
+        return ""
+    return "<ol>" + "\n".join(items) + "</ol>"
 
 def parse_norm(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -63,35 +90,36 @@ def parse_norm(html):
     i = 0
     while i < len(children):
         child = children[i]
+        child_tag = getattr(child, 'name', None)
 
-        if getattr(child, 'name', None) == 'div' and 'paratext' in child.get('class', []):
+        if child_tag == 'div' and 'paratext' in child.get('class', []):
             paragraph = extract_text_with_sup(child)
             content_parts.append(f"<p>{paragraph}</p>")
 
             if i + 1 < len(children):
                 next_elem = children[i + 1]
                 if getattr(next_elem, 'name', None) == 'dl':
-                    list_items = []
-                    for dt in next_elem.find_all('dt'):
-                        dd = dt.find_next_sibling('dd')
-                        if dd:
-                            dd_div = dd.find('div', class_='paratext')
-                            dd_text = extract_text_with_sup(dd_div if dd_div else dd)
-                            list_items.append(f"<li>{dd_text}</li>")
-                    if list_items:
-                        content_parts.append("<ol>" + "\n".join(list_items) + "</ol>")
-                    i += 1 
+                    ol = process_dl(next_elem)
+                    if ol:
+                        content_parts.append(ol)
+                    i += 1
 
-        elif getattr(child, 'name', None) == 'dl':
-            list_items = []
-            for dt in child.find_all('dt'):
-                dd = dt.find_next_sibling('dd')
-                if dd:
-                    dd_div = dd.find('div', class_='paratext')
-                    dd_text = extract_text_with_sup(dd_div if dd_div else dd)
-                    list_items.append(f"<li>{dd_text}</li>")
-            if list_items:
-                content_parts.append("<ol>" + "\n".join(list_items) + "</ol>")
+        elif child_tag == 'dl':
+            ol = process_dl(child)
+            if ol:
+                content_parts.append(ol)
+
+        elif child_tag == 'table':
+            rows = []
+            for tr in child.find_all('tr'):
+                cells = [
+                    f"<td>{extract_text_with_sup(td)}</td>"
+                    for td in tr.find_all(['td', 'th'])
+                ]
+                if cells:
+                    rows.append(f"<tr>{''.join(cells)}</tr>")
+            if rows:
+                content_parts.append(f"<table>{''.join(rows)}</table>")
 
         i += 1
 
@@ -108,14 +136,19 @@ def parse_norm(html):
 def parse_overview(html):
     soup = BeautifulSoup(html, 'html.parser')
 
-    date_div = soup.find('div', string=re.compile(r'Text gilt ab:'))
-    if not date_div:
-        return None
+    metadata = soup.find('div', id='doc-metadata')
+    search_root = metadata if metadata else soup
 
-    text = date_div.get_text(strip=True)
-
-    m = re.search(r'\d{2}\.\d{2}\.\d{4}', text)
-    if m:
-        return m.group(0)
+    for div in search_root.find_all('div'):
+        text = div.get_text(" ", strip=True)
+        if 'Text gilt ab:' not in text:
+            continue
+        m = re.search(r'(\d{2})\.(\d{2})\.(\d{4})', text)
+        if m:
+            day, month, year = map(int, m.groups())
+            try:
+                return date(year, month, day)
+            except ValueError:
+                return None
 
     return None

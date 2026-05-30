@@ -1,9 +1,12 @@
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-pymysql==1.1.1
+flask==3.1.1
+flask-sqlalchemy==3.1.1
+flask-login==0.6.3
+gunicorn==23.0.0
+sqlalchemy==2.0.31
 pyyaml==6.0.2
-pydantic==2.10.6
 requests==2.32.3
 beautifulsoup4==4.12.3
 jinja2==3.1.6
 psutil==7.2.2
+pymysql==1.1.1
+python-dotenv==1.1.0
